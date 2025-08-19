@@ -19,6 +19,11 @@ if not os.path.exists(PARIS_FILE):
     with open(PARIS_FILE, "w") as f:
         json.dump([], f)
 
+# Route racine
+@app.route("/")
+def home():
+    return "Bienvenue sur le serveur Pari en Ligne !"
+
 # Routes HTTP pour gérer comptes et matchs
 @app.route("/register", methods=["POST"])
 def register():
@@ -30,11 +35,9 @@ def register():
     utilisateurs[nom] = {"francs": francs, "dollars": dollars}
     return jsonify({"message": f"Utilisateur {nom} enregistré", "compte": utilisateurs[nom]})
 
-
 @app.route("/list_matchs", methods=["GET"])
 def list_matchs():
     return jsonify(matchs)
-
 
 @app.route("/compte/<nom>", methods=["GET"])
 def compte(nom):
@@ -73,7 +76,6 @@ def parier():
     
     return jsonify({"message": f"{nom} a parié sur {choix}", "paris": paris})
 
-
 # Socket.IO pour publier les matchs en temps réel
 @socketio.on("publier_match")
 def handle_publier_match(data):
@@ -82,5 +84,6 @@ def handle_publier_match(data):
     emit("nouveau_match", match, broadcast=True)  # envoie à tous les clients connectés
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))  # Render fournit le port via variable d'environnement
+    socketio.run(app, host="0.0.0.0", port=port)
 
