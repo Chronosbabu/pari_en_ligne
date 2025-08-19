@@ -1,4 +1,5 @@
-const socket = io("http://localhost:5000"); // l'adresse du serveur Flask
+// Connexion au serveur Socket.IO
+const socket = io("https://pari-en-ligne.onrender"); // adresse du serveur en ligne
 
 // Fenêtres
 const inscriptionDiv = document.getElementById("inscription");
@@ -11,7 +12,7 @@ let username = "";
 // Valider inscription
 document.getElementById("valider").addEventListener("click", () => {
   username = document.getElementById("username").value.trim();
-  if(username){
+  if (username) {
     inscriptionDiv.classList.add("hidden");
     mainDiv.classList.remove("hidden");
     fetchMatchs();
@@ -24,20 +25,20 @@ socket.on("nouveau_match", (match) => {
 });
 
 // Ajouter un match à la liste
-function ajouterMatch(match){
+function ajouterMatch(match) {
   const li = document.createElement("li");
   li.textContent = `${match.equipe1} vs ${match.equipe2}`;
-  
+
   const btn = document.createElement("button");
   btn.textContent = "Parier";
   btn.addEventListener("click", () => ouvrirPariDialog(match));
-  
+
   li.appendChild(btn);
   matchList.appendChild(li);
 }
 
 // Ouvrir boîte de dialogue pari
-function ouvrirPariDialog(match){
+function ouvrirPariDialog(match) {
   pariDialog.classList.remove("hidden");
 
   // Nettoyer les anciens événements
@@ -48,24 +49,25 @@ function ouvrirPariDialog(match){
       alert(`${username} a parié sur ${choix} pour ${match.equipe1} vs ${match.equipe2}`);
       pariDialog.classList.add("hidden");
 
-      // Ici tu peux envoyer le pari au serveur via fetch ou Socket.IO
-      // Exemple :
-      /*
-      fetch("http://localhost:5000/parier", {
+      // Envoyer le pari au serveur via fetch
+      fetch("https://pari-en-ligne.onrender/parier", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({nom: username, match: match, choix: choix})
-      }).then(res => res.json()).then(data => console.log(data));
-      */
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nom: username, match: match, choix: choix })
+      })
+      .then(res => res.json())
+      .then(data => console.log(data))
+      .catch(err => console.error("Erreur serveur :", err));
     }
   });
 }
 
 // Récupérer matchs déjà publiés
-function fetchMatchs(){
-  fetch("http://localhost:5000/list_matchs")
+function fetchMatchs() {
+  fetch("https://pari-en-ligne.onrender/list_matchs")
     .then(res => res.json())
     .then(data => {
       data.forEach(match => ajouterMatch(match));
-    });
+    })
+    .catch(err => console.error("Erreur récupération matchs :", err));
 }
