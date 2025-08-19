@@ -7,45 +7,106 @@
   <meta name="Generator" content="Cocoa HTML Writer">
   <meta name="CocoaVersion" content="2575.6">
   <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000; min-height: 14.0px}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000}
+    span.s1 {font-kerning: none}
   </style>
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="fr"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;Paris en Ligne&lt;/title&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;link rel="stylesheet" href="style.css"&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Fenêtre d'inscription --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="inscription" class="centered"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;h2&gt;Inscription&lt;/h2&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;input type="text" id="username" placeholder="Nom d'utilisateur"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;button id="valider"&gt;Valider&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Fenêtre principale --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="main" class="centered hidden"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;h2&gt;Matchs publiés&lt;/h2&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;ul id="matchList"&gt;&lt;/ul&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Boîte de dialogue pari --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="pariDialog" class="centered hidden"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;h3&gt;Choisir votre pari&lt;/h3&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;button class="pariBtn" data-choice="equipe1"&gt;Équipe 1&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;button class="pariBtn" data-choice="nul"&gt;Nul&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;button class="pariBtn" data-choice="equipe2"&gt;Équipe 2&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://cdn.socket.io/4.6.1/socket.io.min.js"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="script.js"&gt;&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+<p class="p1"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
+<p class="p2"><span class="s1">&lt;html lang="fr"&gt;</span></p>
+<p class="p2"><span class="s1">&lt;head&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span>&lt;title&gt;Pari en Ligne&lt;/title&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span>&lt;style&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>* {</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>box-sizing: border-box;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>body {</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>font-family: Arial, sans-serif;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>margin: 0;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>padding: 0;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>flex-direction: column;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>min-height: 100vh;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>background-color: #f0f0f0;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>header {</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>background-color: #2e86de;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>color: white;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>width: 100%;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>padding: 1rem;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>text-align: center;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>main {</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>flex: 1;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>flex-direction: column;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>align-items: center;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>justify-content: center;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>width: 90%;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>max-width: 500px; /* limite sur grands écrans */</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>margin: 1rem auto;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>padding: 1rem;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>background-color: white;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>border-radius: 10px;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>box-shadow: 0 0 15px rgba(0,0,0,0.1);</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>input, select {</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>width: 100%;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>padding: 0.5rem;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>margin: 0.5rem 0 1rem 0;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 1rem;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>border: 1px solid #ccc;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>border-radius: 5px;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>button {</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>width: 100%;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>padding: 0.7rem;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 1rem;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>border: none;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>border-radius: 5px;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>background-color: #2e86de;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>color: white;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>cursor: pointer;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>button:hover {</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>background-color: #1b4f72;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>@media (max-width: 400px) {</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>main {</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span>width: 95%;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span>padding: 0.5rem;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p1"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>button {</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span>font-size: 0.9rem;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</span></p>
+<p class="p2"><span class="s1">&lt;/head&gt;</span></p>
+<p class="p2"><span class="s1">&lt;body&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span>&lt;header&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>&lt;h1&gt;Pari en Ligne&lt;/h1&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/header&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span>&lt;main&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>&lt;p&gt;Bienvenue sur le serveur Pari en Ligne !&lt;/p&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>&lt;input type="text" placeholder="Nom utilisateur"&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>&lt;input type="number" placeholder="Montant"&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span>&lt;button&gt;Parier&lt;/button&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/main&gt;</span></p>
+<p class="p2"><span class="s1">&lt;/body&gt;</span></p>
+<p class="p2"><span class="s1">&lt;/html&gt;</span></p>
+<p class="p1"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space"> </span></span></p>
 </body>
 </html>

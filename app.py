@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_socketio import SocketIO, emit
 import json
 import os
@@ -19,10 +19,15 @@ if not os.path.exists(PARIS_FILE):
     with open(PARIS_FILE, "w") as f:
         json.dump([], f)
 
-# Route racine
+# Route racine, sert le frontend
 @app.route("/")
 def home():
-    return "Bienvenue sur le serveur Pari en Ligne !"
+    return send_from_directory("frontend", "index.html")
+
+# Pour servir les autres fichiers statiques (CSS, JS)
+@app.route("/<path:path>")
+def static_files(path):
+    return send_from_directory("frontend", path)
 
 # Routes HTTP pour gérer comptes et matchs
 @app.route("/register", methods=["POST"])
