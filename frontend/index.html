@@ -16,77 +16,34 @@
 <p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
 <p class="p1"><span class="s1">&lt;html lang="fr"&gt;</span></p>
 <p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;meta charset="UTF-8"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;title&gt;Pari en Ligne&lt;/title&gt;</span></p>
-<p class="p1"><span class="s1">&lt;style&gt;</span></p>
-<p class="p1"><span class="s1">* { box-sizing: border-box; }</span></p>
-<p class="p1"><span class="s1">body { font-family: Arial, sans-serif; margin:0; padding:0; display:flex; flex-direction:column; min-height:100vh; background:#f0f0f0;}</span></p>
-<p class="p1"><span class="s1">header { background:#2e86de; color:white; width:100%; padding:1rem; text-align:center;}</span></p>
-<p class="p1"><span class="s1">main { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:90%; max-width:500px; margin:1rem auto; padding:1rem; background:white; border-radius:10px; box-shadow:0 0 15px rgba(0,0,0,0.1);}</span></p>
-<p class="p1"><span class="s1">input, select { width:100%; padding:0.5rem; margin:0.5rem 0 1rem 0; font-size:1rem; border:1px solid #ccc; border-radius:5px;}</span></p>
-<p class="p1"><span class="s1">button { width:100%; padding:0.7rem; font-size:1rem; border:none; border-radius:5px; background:#2e86de; color:white; cursor:pointer;}</span></p>
-<p class="p1"><span class="s1">button:hover { background:#1b4f72;}</span></p>
-<p class="p1"><span class="s1">@media (max-width:400px) { main { width:95%; padding:0.5rem;} button { font-size:0.9rem; } }</span></p>
-<p class="p1"><span class="s1">&lt;/style&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;title&gt;Paris en Ligne&lt;/title&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.socket.io/4.6.1/socket.io.min.js"&gt;&lt;/script&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="script.js" defer&gt;&lt;/script&gt;</span></p>
 <p class="p1"><span class="s1">&lt;/head&gt;</span></p>
 <p class="p1"><span class="s1">&lt;body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;header&gt;</span></p>
-<p class="p1"><span class="s1">&lt;h1&gt;Pari en Ligne&lt;/h1&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/header&gt;</span></p>
-<p class="p1"><span class="s1">&lt;main&gt;</span></p>
-<p class="p1"><span class="s1">&lt;input type="text" id="nom" placeholder="Nom utilisateur"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;input type="number" id="montant" placeholder="Montant"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;button onclick="registerUser()"&gt;Enregistrer&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;h1&gt;Paris en Ligne&lt;/h1&gt;</span></p>
 <p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;h3&gt;Liste des matchs&lt;/h3&gt;</span></p>
-<p class="p1"><span class="s1">&lt;ul id="matchs"&gt;&lt;/ul&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;h2&gt;Enregistrer un utilisateur&lt;/h2&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;input type="text" id="nom" placeholder="Nom"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;input type="number" id="francs" placeholder="Francs"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;input type="number" id="dollars" placeholder="Dollars"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;button onclick="registerUser()"&gt;Enregistrer&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div id="registerResult"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
 <p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;input type="text" id="match" placeholder="Nom du match"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;select id="choix"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;option value="equipe1"&gt;Équipe 1&lt;/option&gt;</span></p>
-<p class="p1"><span class="s1">&lt;option value="equipe2"&gt;Équipe 2&lt;/option&gt;</span></p>
-<p class="p1"><span class="s1">&lt;option value="nul"&gt;Nul&lt;/option&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/select&gt;</span></p>
-<p class="p1"><span class="s1">&lt;button onclick="placeBet()"&gt;Parier&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/main&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;h2&gt;Publier un match&lt;/h2&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;input type="text" id="equipe1" placeholder="Équipe 1"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;input type="text" id="equipe2" placeholder="Équipe 2"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;button onclick="publierMatch()"&gt;Publier&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
 <p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;script src="https://cdn.socket.io/4.7.2/socket.io.min.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;script&gt;</span></p>
-<p class="p1"><span class="s1">const socket = io();</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">// Ajouter un nouveau match depuis le serveur</span></p>
-<p class="p1"><span class="s1">socket.on('nouveau_match', (match) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const li = document.createElement('li');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>li.textContent = match.equipe1 + " vs " + match.equipe2;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>document.getElementById('matchs').appendChild(li);</span></p>
-<p class="p1"><span class="s1">});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">function registerUser(){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const nom = document.getElementById('nom').value;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const montant = Number(document.getElementById('montant').value);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>fetch('/register', {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>method:'POST',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>headers:{'Content-Type':'application/json'},</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>body: JSON.stringify({nom: nom, francs: montant})</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}).then(res=&gt;res.json()).then(data=&gt;alert(data.message));</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">function placeBet(){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const nom = document.getElementById('nom').value;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const match = document.getElementById('match').value;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const choix = document.getElementById('choix').value;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>fetch('/parier', {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>method:'POST',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>headers:{'Content-Type':'application/json'},</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>body: JSON.stringify({nom, match, choix})</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}).then(res=&gt;res.json()).then(data=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if(data.error) alert(data.error);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>else alert(data.message);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p1"><span class="s1">&lt;/script&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;h2&gt;Matchs en direct&lt;/h2&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;ul id="matchsList"&gt;&lt;/ul&gt;</span></p>
 <p class="p1"><span class="s1">&lt;/body&gt;</span></p>
 <p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
 </body>
 </html>
