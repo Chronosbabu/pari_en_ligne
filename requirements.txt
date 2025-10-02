@@ -1,9 +1,7 @@
+
 Flask==2.3.3
-
-flask-cors==3.0.10
-
-gunicorn==21.2.0
-requests==2.31.0
-Python-socketio==5.9.0
-Flack-socketio==5.3.2
+Flask-Cors==3.0.10
+python-socketio==5.9.0
+flask-socketio==5.3.2
 eventlet==0.33.3
+requests==2.31.0
