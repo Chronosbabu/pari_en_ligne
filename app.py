@@ -5,7 +5,7 @@ from flask_socketio import SocketIO
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 
-# ⚡ utiliser gevent pour Render + Python 3.13
+# ⚡ Utiliser gevent
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent')
 
 @app.route('/')
