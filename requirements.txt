@@ -4,3 +4,4 @@ python-socketio==5.11.4
 gevent==24.10.1
 gevent-websocket==0.10.1
 gunicorn==23.0.0
+firebase-admin
