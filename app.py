@@ -2,17 +2,14 @@
 # Serveur Flask avec SocketIO
 # Écoute les commandes du client et les diffuse à tous les clients connectés.
 
-import gevent.monkey  # Monkey patching pour compatibilité asynchrone
-gevent.monkey.patch_all()
-
 from flask import Flask
 from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'  # Clé secrète pour la sécurité
 
-# Initialiser SocketIO avec mode 'gevent'
-socketio = SocketIO(app, async_mode='gevent', cors_allowed_origins='*')
+# Initialiser SocketIO avec mode 'threading' (plus compatible avec Render et Flutter)
+socketio = SocketIO(app, async_mode='threading', cors_allowed_origins='*')
 
 # Route de base pour vérifier que le serveur fonctionne
 @app.route('/')
