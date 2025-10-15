@@ -1,23 +1,36 @@
+# app.py
+# Serveur Flask avec SocketIO
+# Écoute les commandes du client et les diffuse à tous les clients connectés.
+
+import gevent.monkey  # Monkey patching pour compatibilité asynchrone
+gevent.monkey.patch_all()
+
 from flask import Flask
 from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
+app.config['SECRET_KEY'] = 'secret!'  # Clé secrète pour la sécurité
 
-socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins='*')
+# Initialiser SocketIO avec mode 'gevent'
+socketio = SocketIO(app, async_mode='gevent', cors_allowed_origins='*')
 
+# Route de base pour vérifier que le serveur fonctionne
 @app.route('/')
 def index():
     return "Serveur SocketIO en ligne"
 
+# Événement SocketIO pour recevoir une commande
 @socketio.on('command')
 def handle_command(data):
     action = data.get('action')
-    print(f"Commande reçue: {action}")
-    emit('command', {'action': action}, broadcast=True)
+    if action in ['allumer', 'eteindre']:
+        print(f"Commande reçue: {action}")
+        # Diffuser la commande à tous les clients connectés via SocketIO
+        emit('command', {'action': action}, broadcast=True)
+    else:
+        print("Commande invalide")
 
+# Lancer le serveur si exécuté directement (tests locaux)
 if __name__ == '__main__':
-    import eventlet
-    import eventlet.wsgi
     socketio.run(app, host='0.0.0.0', port=5000)
 
