@@ -1,33 +1,28 @@
-# app.py
-# Serveur Flask avec SocketIO
-# Écoute les commandes du client et les diffuse à tous les clients connectés.
+# Fichier 1: serveur.py (Serveur central en Python avec Flask et Flask-SocketIO)
+# À déployer sur Render. Assurez-vous d'installer les dépendances : flask, flask-socketio, eventlet
+# requirements.txt : flask==3.0.3, flask-socketio==5.3.6, eventlet==0.36.1
+# Exécutez avec : python serveur.py
 
 from flask import Flask
 from flask_socketio import SocketIO, emit
+import os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'  # Clé secrète pour la sécurité
+socketio = SocketIO(app, cors_allowed_origins="*")  # Autoriser toutes les origines pour simplicité
 
-# Initialiser SocketIO avec mode 'threading' (plus compatible avec Render et Flutter)
-socketio = SocketIO(app, async_mode='threading', cors_allowed_origins='*')
+@socketio.on('connect')
+def handle_connect():
+    print('Un client s\'est connecté')
 
-# Route de base pour vérifier que le serveur fonctionne
-@app.route('/')
-def index():
-    return "Serveur SocketIO en ligne"
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('Un client s\'est déconnecté')
 
-# Événement SocketIO pour recevoir une commande
-@socketio.on('command')
-def handle_command(data):
-    action = data.get('action')
-    if action in ['allumer', 'eteindre']:
-        print(f"Commande reçue: {action}")
-        # Diffuser la commande à tous les clients connectés via SocketIO
-        emit('command', {'action': action}, broadcast=True)
-    else:
-        print("Commande invalide")
+@socketio.on('obstacle_detected')
+def handle_obstacle(data):
+    print('Information reçue du local py:', data)
+    emit('new_message', {'message': 'Information reçue: Obstacle détecté à 5cm'}, broadcast=True)
 
-# Lancer le serveur si exécuté directement (tests locaux)
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000)
-
+    port = int(os.environ.get('PORT', 5000))  # Render utilise la variable d'environnement PORT
+    socketio.run(app, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
