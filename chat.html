@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - Place de Marché</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh;}
+        header {background: white; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center;}
+        .avatar {width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 24px; margin-right: 12px;}
+        #messages {flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column;}
+        .bubble {max-width: 70%; padding: 10px 14px; border-radius: 18px; margin-bottom: 10px; word-wrap: break-word;}
+        .sent {background: #1877f2; color: white; align-self: flex-end; margin-left: auto;}
+        .received {background: #e4e6eb; color: black; align-self: flex-start;}
+        .input-bar {display: flex; padding: 10px; background: white; box-shadow: 0 -2px 4px rgba(0,0,0,0.1);}
+        #messageInput {flex: 1; padding: 12px; border-radius: 25px; border: 1px solid #ddd; margin-right: 10px;}
+        #sendBtn {background: #1877f2; color: white; border: none; padding: 0 20px; border-radius: 25px;}
+        #loginModal {display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000;}
+        .modal-content {background: white; padding: 30px; border-radius: 12px; width: 320px; text-align: center;}
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" style="font-size: 24px; margin-right: 15px; text-decoration:none; color:black;">←</a>
+        <div class="avatar" id="sellerAvatar"></div>
+        <div id="sellerName" style="font-weight:600; font-size:18px;"></div>
+    </header>
+
+    <div id="messages"></div>
+
+    <div class="input-bar">
+        <input type="text" id="messageInput" placeholder="Écris un message...">
+        <button id="sendBtn">Envoyer</button>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal">
+        <div class="modal-content">
+            <h2>Connexion requise</h2>
+            <input id="loginUser" placeholder="Nom d'utilisateur" style="width:100%; padding:10px; margin:10px 0;">
+            <input id="loginPass" type="password" placeholder="Mot de passe" style="width:100%; padding:10px; margin:10px 0;">
+            <button id="loginBtn" style="width:100%; padding:12px; background:#1877f2; color:white; border:none; border-radius:8px;">Valider</button>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const seller = urlParams.get('seller');
+        if (!seller) window.location = '/';
+
+        document.getElementById('sellerName').textContent = seller;
+        document.getElementById('sellerAvatar').textContent = seller.charAt(0).toUpperCase();
+        document.getElementById('sellerAvatar').style.backgroundColor = hslColor(seller);
+
+        function hslColor(name) {
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            const hue = Math.abs(hash % 360);
+            return `hsl(${hue}, 70%, 50%)`;
+        }
+
+        let username = localStorage.getItem('username');
+        let password = localStorage.getItem('password');
+        let socket = null;
+
+        const messagesDiv = document.getElementById('messages');
+
+        function scrollToBottom() {
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function addMessage(msg) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble ' + (msg.from === username ? 'sent' : 'received');
+            bubble.textContent = msg.text;
+            messagesDiv.appendChild(bubble);
+            scrollToBottom();
+        }
+
+        function initChat() {
+            fetch(`/api/messages?with=${encodeURIComponent(seller)}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
+                .then(r => r.json())
+                .then(msgs => {
+                    msgs.forEach(addMessage);
+                });
+
+            socket = io({
+                auth: { username, password }
+            });
+
+            socket.emit('join_chat', { with: seller });
+
+            socket.on('new_message', msg => {
+                addMessage(msg);
+            });
+        }
+
+        document.getElementById('sendBtn').onclick = () => {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            if (text && socket) {
+                socket.emit('send_message', { to: seller, text });
+                input.value = '';
+            }
+        };
+
+        document.getElementById('messageInput').addEventListener('keypress', e => {
+            if (e.key === 'Enter') document.getElementById('sendBtn').click();
+        });
+
+        // Login
+        document.getElementById('loginBtn').onclick = async () => {
+            username = document.getElementById('loginUser').value.trim();
+            password = document.getElementById('loginPass').value;
+            if (!username || !password) return alert('Remplis tout');
+            const res = await fetch('/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, password})
+            });
+            const data = await res.json();
+            if (data.success) {
+                localStorage.setItem('username', username);
+                localStorage.setItem('password', password);
+                document.getElementById('loginModal').style.display = 'none';
+                initChat();
+            } else {
+                alert(data.error || 'Erreur connexion');
+            }
+        };
+
+        if (!username || !password) {
+            document.getElementById('loginModal').style.display = 'flex';
+        } else {
+            initChat();
+        }
+    </script>
+</body>
+</html>

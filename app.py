@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify, send_file
+from flask_socketio import SocketIO, join_room, emit
 import datetime
 from base64 import b64encode
 import json
 import os
 
 app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 DATA_FILE = 'data.json'
 
@@ -14,22 +16,74 @@ if os.path.exists(DATA_FILE):
         data = json.load(f)
         users = data.get('users', {})
         posts = data.get('posts', [])
+        messages = data.get('messages', [])
 else:
     users = {}
     posts = []
+    messages = []
+
+connected_users = {}
 
 def save_data():
-    data = {'users': users, 'posts': posts}
+    data = {'users': users, 'posts': posts, 'messages': messages}
     with open(DATA_FILE, 'w') as f:
-        json.dump(data, f)
+        json.dump(data, f, ensure_ascii=False)
 
 @app.route('/')
 def index():
     return send_file('style.html')
 
+@app.route('/chat')
+def chat():
+    return send_file('chat.html')
+
 @app.route('/api/posts')
 def get_posts():
     return jsonify(posts)
+
+@app.route('/login', methods=['POST'])
+def user_login():
+    data = request.get_json() or {}
+    username = data.get('username')
+    password = data.get('password')
+    if not username or not password:
+        return jsonify({'error': 'Champs requis'}), 400
+    if username in users and users[username] != password:
+        return jsonify({'error': 'Mot de passe incorrect'}), 401
+    users[username] = password
+    save_data()
+    return jsonify({'success': True})
+
+@app.route('/api/messages')
+def api_messages():
+    with_u = request.args.get('with')
+    username = request.args.get('username')
+    pwd = request.args.get('password')
+    if not with_u or not username or pwd is None or users.get(username) != pwd:
+        return jsonify({'error': 'Auth requise'}), 401
+    conv_msgs = [m for m in messages if set([m['from'], m['to']]) == set([username, with_u])]
+    conv_msgs.sort(key=lambda m: m['time'])
+    return jsonify(conv_msgs)
+
+@app.route('/api/conversations')
+def api_conversations():
+    username = request.args.get('username')
+    pwd = request.args.get('password')
+    if not username or pwd is None or users.get(username) != pwd:
+        return jsonify({'error': 'Auth requise'}), 401
+    conv = set()
+    last_times = {}
+    for m in messages:
+        if m['from'] == username:
+            other = m['to']
+        elif m['to'] == username:
+            other = m['from']
+        else:
+            continue
+        conv.add(other)
+        last_times[other] = max(last_times.get(other, '0'), m['time'])
+    conv_list = sorted(conv, key=lambda u: last_times.get(u, '0'), reverse=True)
+    return jsonify(conv_list)
 
 @app.route('/publish', methods=['POST'])
 def publish():
@@ -45,12 +99,10 @@ def publish():
     if not all([username, password, title, price, shipping_price]):
         return jsonify({'error': 'Tous les champs sont requis'}), 400
 
-    # Inscription / connexion auto
-    if username in users:
-        if users[username] != password:
-            return jsonify({'error': 'Mot de passe incorrect'}), 401
-    else:
-        users[username] = password
+    if username in users and users[username] != password:
+        return jsonify({'error': 'Mot de passe incorrect'}), 401
+
+    users[username] = password
 
     image_file = request.files['image']
     image_data = image_file.read()
@@ -68,9 +120,53 @@ def publish():
     }
     posts.append(post)
     save_data()
-
     return jsonify({'success': True})
 
+# ───── SocketIO Events ─────
+@socketio.on('connect')
+def handle_connect(auth):
+    if not auth:
+        auth = {}
+    username = auth.get('username')
+    password = auth.get('password')
+    if not username or password is None or users.get(username) != password:
+        return False
+    connected_users[request.sid] = username
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    connected_users.pop(request.sid, None)
+
+@socketio.on('join_chat')
+def handle_join(data):
+    with_u = data.get('with')
+    if not with_u:
+        return
+    username = connected_users.get(request.sid)
+    if not username:
+        return
+    room = '_'.join(sorted([username, with_u]))
+    join_room(room)
+
+@socketio.on('send_message')
+def handle_send(data):
+    text = data.get('text', '').strip()
+    to = data.get('to')
+    if not text or not to:
+        return
+    username = connected_users.get(request.sid)
+    if not username:
+        return
+    msg = {
+        'from': username,
+        'to': to,
+        'text': text,
+        'time': datetime.datetime.now().isoformat()
+    }
+    messages.append(msg)
+    save_data()
+    room = '_'.join(sorted([username, to]))
+    emit('new_message', msg, room=room)
+
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))

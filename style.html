@@ -6,41 +6,13 @@
     <title>Place de Marché</title>
     <style>
         body {font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 0;}
-        h1 {
-            text-align: center;
-            padding: 20px;
-            color: #1c1e21;
-            background: white;
-            margin: 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+        h1 {text-align: center; padding: 20px; color: #1c1e21; background: white; margin: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;}
         #feed {max-width: 800px; margin: 0 auto; padding: 20px 10px;}
-        .post {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        .header {
-            display: flex;
-            align-items: center;
-            padding: 15px 15px 10px;
-        }
-        .avatar {
-            width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: bold; font-size: 28px; margin-right: 12px; flex-shrink: 0;
-        }
-        .user-info {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        .username {font-weight: 600; font-size: 15px; color: #1c1e21;}
+        .post {background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; overflow: hidden;}
+        .header {display: flex; align-items: center; padding: 15px 15px 10px;}
+        .avatar {width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 28px; margin-right: 12px; flex-shrink: 0;}
+        .user-info {flex-grow: 1;}
+        .username {font-weight: 600; font-size: 15px; color: #1877f2; text-decoration: none;}
         .title {font-size: 19px; font-weight: bold; color: #1c1e21; margin: 4px 0;}
         .prices {font-size: 17px; font-weight: 600; color: #1877f2;}
         .time {font-size: 13px; color: #606770; margin-top: 4px;}
@@ -50,14 +22,12 @@
 </head>
 <body>
     <h1>🛒 Place de Marché</h1>
-    <div id="feed"><div class="loading">Chargement des publications...</div></div>
+    <div id="feed"><div class="loading">Chargement...</div></div>
 
     <script>
         function getColor(name) {
             let hash = 0;
-            for (let i = 0; i < name.length; i++) {
-                hash = name.charCodeAt(i) + ((hash << 5) - hash);
-            }
+            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
             const hue = Math.abs(hash % 360);
             return `hsl(${hue}, 70%, 50%)`;
         }
@@ -67,17 +37,13 @@
                 const res = await fetch('/api/posts');
                 if (!res.ok) throw new Error();
                 let posts = await res.json();
-
                 const feed = document.getElementById('feed');
                 feed.innerHTML = '';
-
                 if (posts.length === 0) {
                     feed.innerHTML = '<div class="loading">Aucune publication pour le moment.</div>';
                     return;
                 }
-
-                posts
-                    .sort((a, b) => new Date(b.time) - new Date(a.time))
+                posts.sort((a, b) => new Date(b.time) - new Date(a.time))
                     .forEach(post => {
                         const postDiv = document.createElement('div');
                         postDiv.className = 'post';
@@ -93,42 +59,35 @@
                         const userInfo = document.createElement('div');
                         userInfo.className = 'user-info';
 
-                        const usernameSpan = document.createElement('div');
-                        usernameSpan.className = 'username';
-                        usernameSpan.textContent = post.username;
+                        const usernameLink = document.createElement('a');
+                        usernameLink.href = `chat.html?seller=${encodeURIComponent(post.username)}`;
+                        usernameLink.className = 'username';
+                        usernameLink.textContent = post.username;
 
                         const titleDiv = document.createElement('div');
                         titleDiv.className = 'title';
-                        titleDiv.textContent = post.title || post.description || 'Sans titre';
+                        titleDiv.textContent = post.title || 'Sans titre';
 
                         const pricesDiv = document.createElement('div');
                         pricesDiv.className = 'prices';
-                        const p = post.price || 'N/A';
-                        const s = post.shipping_price || 'N/A';
-                        pricesDiv.textContent = `${p} € • Livraison ${s} €`;
+                        pricesDiv.textContent = `${post.price || 'N/A'} € • Livraison ${post.shipping_price || 'N/A'} €`;
 
                         const timeSpan = document.createElement('div');
                         timeSpan.className = 'time';
                         timeSpan.textContent = new Date(post.time).toLocaleString('fr-FR');
 
-                        userInfo.appendChild(usernameSpan);
-                        userInfo.appendChild(titleDiv);
-                        userInfo.appendChild(pricesDiv);
-                        userInfo.appendChild(timeSpan);
-
-                        header.appendChild(avatar);
-                        header.appendChild(userInfo);
+                        userInfo.append(usernameLink, titleDiv, pricesDiv, timeSpan);
+                        header.append(avatar, userInfo);
 
                         const img = document.createElement('img');
                         img.src = post.image_base64;
                         img.alt = 'Article';
 
-                        postDiv.appendChild(header);
-                        postDiv.appendChild(img);
+                        postDiv.append(header, img);
                         feed.appendChild(postDiv);
                     });
             } catch (e) {
-                document.getElementById('feed').innerHTML = '<div class="loading">Erreur de chargement. Réessayez.</div>';
+                document.getElementById('feed').innerHTML = '<div class="loading">Erreur de chargement.</div>';
             }
         }
 
