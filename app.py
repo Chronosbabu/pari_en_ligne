@@ -1,28 +1,72 @@
-# Fichier 1: serveur.py (Serveur central en Python avec Flask et Flask-SocketIO)
-# À déployer sur Render. Assurez-vous d'installer les dépendances : flask, flask-socketio, eventlet
-# requirements.txt : flask==3.0.3, flask-socketio==5.3.6, eventlet==0.36.1
-# Exécutez avec : python serveur.py
-
-from flask import Flask
-from flask_socketio import SocketIO, emit
+from flask import Flask, request, jsonify, send_file
+import datetime
+from base64 import b64encode
+import json
 import os
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")  # Autoriser toutes les origines pour simplicité
 
-@socketio.on('connect')
-def handle_connect():
-    print('Un client s\'est connecté')
+DATA_FILE = 'data.json'
 
-@socketio.on('disconnect')
-def handle_disconnect():
-    print('Un client s\'est déconnecté')
+# Chargement des données au démarrage
+if os.path.exists(DATA_FILE):
+    with open(DATA_FILE, 'r') as f:
+        data = json.load(f)
+        users = data.get('users', {})
+        posts = data.get('posts', [])
+else:
+    users = {}
+    posts = []
 
-@socketio.on('obstacle_detected')
-def handle_obstacle(data):
-    print('Information reçue du local py:', data)
-    emit('new_message', {'message': 'Information reçue: Obstacle détecté à 5cm'}, broadcast=True)
+def save_data():
+    data = {'users': users, 'posts': posts}
+    with open(DATA_FILE, 'w') as f:
+        json.dump(data, f)
+
+@app.route('/')
+def index():
+    return send_file('style.html')
+
+@app.route('/api/posts')
+def get_posts():
+    return jsonify(posts)
+
+@app.route('/publish', methods=['POST'])
+def publish():
+    if 'image' not in request.files or not request.files['image'].filename:
+        return jsonify({'error': 'Image requise'}), 400
+
+    username = request.form.get('username')
+    password = request.form.get('password')
+    description = request.form.get('description')
+
+    if not all([username, password, description]):
+        return jsonify({'error': 'Tous les champs sont requis'}), 400
+
+    # Authentification / Inscription auto
+    if username in users:
+        if users[username] != password:
+            return jsonify({'error': 'Mot de passe incorrect'}), 401
+    else:
+        users[username] = password  # Premier publish = inscription
+
+    image_file = request.files['image']
+    image_data = image_file.read()
+    mimetype = image_file.mimetype or 'image/jpeg'
+    b64 = b64encode(image_data).decode('utf-8')
+    image_base64 = f"data:{mimetype};base64,{b64}"
+
+    post = {
+        'username': username,
+        'description': description,
+        'image_base64': image_base64,
+        'time': datetime.datetime.now().isoformat()
+    }
+    posts.append(post)
+    save_data()
+
+    return jsonify({'success': True})
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # Render utilise la variable d'environnement PORT
-    socketio.run(app, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
