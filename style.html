@@ -6,8 +6,11 @@
     <title>Place de Marché</title>
     <style>
         body {font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 0;}
-        h1 {text-align: center; padding: 20px; color: #1c1e21; background: white; margin: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;}
+        header {display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;}
+        h1 {margin: 0; font-size: 24px;}
+        #authStatus {font-size: 15px;}
         #feed {max-width: 800px; margin: 0 auto; padding: 20px 10px;}
+        /* reste identique */
         .post {background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; overflow: hidden;}
         .header {display: flex; align-items: center; padding: 15px 15px 10px;}
         .avatar {width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 28px; margin-right: 12px; flex-shrink: 0;}
@@ -21,7 +24,10 @@
     </style>
 </head>
 <body>
-    <h1>🛒 Place de Marché</h1>
+    <header>
+        <h1>🛒 Place de Marché</h1>
+        <div id="authStatus">Chargement...</div>
+    </header>
     <div id="feed"><div class="loading">Chargement...</div></div>
 
     <script>
@@ -30,6 +36,21 @@
             for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
             const hue = Math.abs(hash % 360);
             return `hsl(${hue}, 70%, 50%)`;
+        }
+
+        function updateAuthStatus() {
+            const status = document.getElementById('authStatus');
+            const username = localStorage.getItem('username');
+            if (username) {
+                status.innerHTML = `Connecté : ${username} <button onclick="logout()" style="margin-left:15px; padding:5px 10px; background:#e4e6eb; border:none; border-radius:6px;">Déconnexion</button>`;
+            } else {
+                status.innerHTML = '<a href="/login.html" style="color:#1877f2; font-weight:600; text-decoration:none;">Se connecter</a>';
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            location.reload();
         }
 
         async function loadPosts() {
@@ -47,42 +68,32 @@
                     .forEach(post => {
                         const postDiv = document.createElement('div');
                         postDiv.className = 'post';
-
                         const header = document.createElement('div');
                         header.className = 'header';
-
                         const avatar = document.createElement('div');
                         avatar.className = 'avatar';
                         avatar.textContent = post.username.charAt(0).toUpperCase();
                         avatar.style.backgroundColor = getColor(post.username);
-
                         const userInfo = document.createElement('div');
                         userInfo.className = 'user-info';
-
                         const usernameLink = document.createElement('a');
                         usernameLink.href = `chat.html?seller=${encodeURIComponent(post.username)}`;
                         usernameLink.className = 'username';
                         usernameLink.textContent = post.username;
-
                         const titleDiv = document.createElement('div');
                         titleDiv.className = 'title';
                         titleDiv.textContent = post.title || 'Sans titre';
-
                         const pricesDiv = document.createElement('div');
                         pricesDiv.className = 'prices';
                         pricesDiv.textContent = `${post.price || 'N/A'} € • Livraison ${post.shipping_price || 'N/A'} €`;
-
                         const timeSpan = document.createElement('div');
                         timeSpan.className = 'time';
                         timeSpan.textContent = new Date(post.time).toLocaleString('fr-FR');
-
                         userInfo.append(usernameLink, titleDiv, pricesDiv, timeSpan);
                         header.append(avatar, userInfo);
-
                         const img = document.createElement('img');
                         img.src = post.image_base64;
                         img.alt = 'Article';
-
                         postDiv.append(header, img);
                         feed.appendChild(postDiv);
                     });
@@ -91,6 +102,7 @@
             }
         }
 
+        updateAuthStatus();
         loadPosts();
         setInterval(loadPosts, 30000);
     </script>

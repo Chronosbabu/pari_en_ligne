@@ -10,7 +10,6 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 DATA_FILE = 'data.json'
 
-# Chargement des données
 if os.path.exists(DATA_FILE):
     with open(DATA_FILE, 'r') as f:
         data = json.load(f)
@@ -33,6 +32,10 @@ def save_data():
 def index():
     return send_file('style.html')
 
+@app.route('/login.html')
+def login_page():
+    return send_file('login.html')
+
 @app.route('/chat')
 def chat():
     return send_file('chat.html')
@@ -48,8 +51,11 @@ def user_login():
     password = data.get('password')
     if not username or not password:
         return jsonify({'error': 'Champs requis'}), 400
+    
+    # Si l'utilisateur existe déjà et mot de passe faux → erreur, sinon on crée/met à jour
     if username in users and users[username] != password:
         return jsonify({'error': 'Mot de passe incorrect'}), 401
+    
     users[username] = password
     save_data()
     return jsonify({'success': True})
@@ -104,8 +110,7 @@ def publish():
 
     users[username] = password
 
-    image_file = request.files['image']
-    image_data = image_file.read()
+    image_file = image_file.read()
     mimetype = image_file.mimetype or 'image/jpeg'
     b64 = b64encode(image_data).decode('utf-8')
     image_base64 = f"data:{mimetype};base64,{b64}"
