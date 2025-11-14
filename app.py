@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 DATA_FILE = 'data.json'
 
-# Chargement des données au démarrage
+# Chargement des données
 if os.path.exists(DATA_FILE):
     with open(DATA_FILE, 'r') as f:
         data = json.load(f)
@@ -38,17 +38,19 @@ def publish():
 
     username = request.form.get('username')
     password = request.form.get('password')
-    description = request.form.get('description')
+    title = request.form.get('title')
+    price = request.form.get('price')
+    shipping_price = request.form.get('shipping_price')
 
-    if not all([username, password, description]):
+    if not all([username, password, title, price, shipping_price]):
         return jsonify({'error': 'Tous les champs sont requis'}), 400
 
-    # Authentification / Inscription auto
+    # Inscription / connexion auto
     if username in users:
         if users[username] != password:
             return jsonify({'error': 'Mot de passe incorrect'}), 401
     else:
-        users[username] = password  # Premier publish = inscription
+        users[username] = password
 
     image_file = request.files['image']
     image_data = image_file.read()
@@ -58,7 +60,9 @@ def publish():
 
     post = {
         'username': username,
-        'description': description,
+        'title': title,
+        'price': price,
+        'shipping_price': shipping_price,
         'image_base64': image_base64,
         'time': datetime.datetime.now().isoformat()
     }
