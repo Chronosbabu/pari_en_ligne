@@ -44,20 +44,50 @@ def conversations_page():
 def get_posts():
     return jsonify(posts)
 
+@app.route('/register', methods=['POST'])
+def user_register():
+    data = request.get_json() or {}
+    username = data.get('username')
+    password = data.get('password')
+    if not username or not password:
+        return jsonify({'error': 'Champs requis'}), 400
+    if username in users:
+        return jsonify({'error': "Nom d'utilisateur déjà pris"}), 409
+    users[username] = password
+    save_data()
+    return jsonify({'success': True})
+
+@app.route('/login', methods=['POST'])
+def user_login():
+    data = request.get_json() or {}
+    username = data.get('username')
+    password = data.get('password')
+    if not username or not password:
+        return jsonify({'error': 'Champs requis'}), 400
+    if username not in users:
+        return jsonify({'error': 'Utilisateur non trouvé'}), 404
+    if users[username] != password:
+        return jupytext({'error': 'Mot de passe incorrect'}), 401
+    return jsonify({'success': True})
+
 @app.route('/publish', methods=['POST'])
 def publish():
     if 'image' not in request.files or not request.files['image'].filename:
         return jsonify({'error': 'Image requise'}), 400
     username = request.form.get('username')
+    password = request.form.get('password')
     title = request.form.get('title')
     price = request.form.get('price')
     shipping_price = request.form.get('shipping_price')
     avatar = request.form.get('avatar')
-    if not all([username, title, price, shipping_price]):
+    if not all([username, password, title, price, shipping_price]):
         return jsonify({'error': 'Tous les champs sont requis'}), 400
-    # No password check
+    if username not in users or users[username] != password:
+        return jsonify({'error': 'Authentification requise'}), 401
     if username not in users:
         users[username] = {'avatar': avatar}
+    else:
+        users[username]['avatar'] = avatar
     image_file = request.files['image']
     image_data = image_file.read()
     mimetype = image_file.mimetype or 'image/jpeg'
@@ -80,7 +110,8 @@ def publish():
 def api_messages():
     with_u = request.args.get('with')
     username = request.args.get('username')
-    if not all([with_u, username]):
+    pwd = request.args.get('password')
+    if not all([with_u, username, pwd]) or users.get(username) != pwd:
         return jsonify({'error': 'Auth requise'}), 401
     conv_msgs = [m for m in messages if set([m['from'], m['to']]) == set([username, with_u])]
     conv_msgs.sort(key=lambda m: m['time'])
@@ -89,7 +120,8 @@ def api_messages():
 @app.route('/api/conversations')
 def api_conversations():
     username = request.args.get('username')
-    if not username:
+    pwd = request.args.get('password')
+    if not username or not pwd or users.get(username) != pwd:
         return jsonify({'error': 'Auth requise'}), 401
     conv = set()
     last_times = {}
@@ -113,7 +145,8 @@ def handle_connect(auth):
     if not auth:
         return False
     username = auth.get('username')
-    if not username:
+    password = auth.get('password')
+    if not username or not password or users.get(username) != password:
         return False
     connected_users[request.sid] = username  # Store SID to username mapping
     join_room(username)
