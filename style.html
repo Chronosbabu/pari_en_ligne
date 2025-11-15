@@ -1,119 +1,130 @@
+<!-- Fichier de page principale pour le site de vente en ligne (style.html) -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Place de Marché</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        body {font-family: 'Roboto', sans-serif; background: #f0f2f5; margin: 0; padding: 0; transition: all 0.3s ease;}
-        header {display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: linear-gradient(to bottom, white, #f9f9f9); box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;}
-        h1 {margin: 0; font-size: 24px; color: #333;}
-        #authStatus {font-size: 15px; color: #555;}
-        #feed {max-width: 800px; margin: 0 auto; padding: 20px 10px;}
-        .post {background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;}
-        .post:hover {transform: translateY(-5px); box-shadow: 0 6px 16px rgba(0,0,0,0.12);}
-        .header {display: flex; align-items: center; padding: 15px 15px 10px;}
-        .avatar {width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 28px; margin-right: 12px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
-        .user-info {flex-grow: 1;}
-        .username {font-weight: 600; font-size: 15px; color: #1877f2; text-decoration: none; cursor: pointer; transition: color 0.2s;}
-        .username:hover {color: #0e5a9e;}
-        .title {font-size: 19px; font-weight: bold; color: #1c1e21; margin: 4px 0;}
-        .prices {font-size: 17px; font-weight: 600; color: #1877f2;}
-        .time {font-size: 13px; color: #606770; margin-top: 4px;}
-        img {width: 100%; height: auto; display: block; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; loading: lazy;}
-        .loading {text-align: center; padding: 40px; color: #606770; font-size: 18px;}
-        @media (max-width: 600px) {
-            h1 {font-size: 20px;}
-            #feed {padding: 10px;}
-            .post {border-radius: 8px; margin-bottom: 15px;}
-            .avatar {width: 40px; height: 40px; font-size: 20px;}
-            .header {padding: 10px;}
-            .title {font-size: 16px;}
-            .prices {font-size: 14px;}
-            .time {font-size: 12px;}
-            #authStatus {font-size: 13px;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Place de Marché</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body {font-family: 'Roboto', sans-serif; background: #f0f2f5; margin: 0; padding: 0; transition: all 0.3s ease;}
+header {display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: linear-gradient(to bottom, white, #f9f9f9); box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;}
+h1 {margin: 0; font-size: 24px; color: #333;}
+#authStatus {font-size: 15px; color: #555;}
+#feed {max-width: 800px; margin: 0 auto; padding: 20px 10px;}
+.post {background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;}
+.post:hover {transform: translateY(-5px); box-shadow: 0 6px 16px rgba(0,0,0,0.12);}
+.header {display: flex; align-items: center; padding: 15px 15px 10px;}
+.avatar {width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 28px; margin-right: 12px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+.user-info {flex-grow: 1;}
+.username {font-weight: 600; font-size: 15px; color: #1877f2; text-decoration: none; cursor: pointer; transition: color 0.2s;}
+.username:hover {color: #0e5a9e;}
+.title {font-size: 19px; font-weight: bold; color: #1c1e21; margin: 4px 0;}
+.prices {font-size: 17px; font-weight: 600; color: #1877f2;}
+.time {font-size: 13px; color: #606770; margin-top: 4px;}
+img {width: 100%; height: auto; display: block; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; loading: lazy;}
+.loading {text-align: center; padding: 40px; color: #606770; font-size: 18px;}
+@media (max-width: 600px) {
+h1 {font-size: 20px;}
+#feed {padding: 10px;}
+.post {border-radius: 8px; margin-bottom: 15px;}
+.avatar {width: 40px; height: 40px; font-size: 20px;}
+.header {padding: 10px;}
+.title {font-size: 16px;}
+.prices {font-size: 14px;}
+.time {font-size: 12px;}
+#authStatus {font-size: 13px;}
         }
-    </style>
+</style>
 </head>
 <body>
-    <header>
-        <h1>🛒 Place de Marché</h1>
-        <a href="/conversations" style="margin-left: 20px; font-size: 24px; text-decoration: none;">💬</a>
-        <div id="authStatus">Chargement...</div>
-    </header>
-    <div id="feed"><div class="loading">Chargement...</div></div>
-    <script>
-        function getColor(name) {
-            let hash = 0;
-            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-            const hue = Math.abs(hash % 360);
-            return `hsl(${hue}, 70%, 50%)`;
+<header>
+<h1>🛒 Place de Marché</h1>
+<a href="/conversations" style="margin-left: 20px; font-size: 24px; text-decoration: none;">💬</a>
+<div id="authStatus">Chargement...</div>
+</header>
+<div id="feed"><div class="loading">Chargement...</div></div>
+<script>
+function getColor(name) {
+let hash = 0;
+for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+const hue = Math.abs(hash % 360);
+return `hsl(${hue}, 70%, 50%)`;
         }
-        function updateAuthStatus() {
-            const status = document.getElementById('authStatus');
-            const username = localStorage.getItem('username');
-            if (username) {
+function updateAuthStatus() {
+const status = document.getElementById('authStatus');
+const username = localStorage.getItem('username');
+if (username) {
                 status.innerHTML = `Connecté : ${username} <button onclick="logout()" style="margin-left:15px; padding:5px 10px; background:#e4e6eb; border:none; border-radius:6px; cursor:pointer; transition: background 0.2s;">Déconnexion</button>`;
             } else {
-                status.innerHTML = '<a href="/login.html" style="color:#1877f2; font-weight:600; text-decoration:none;">Se connecter</a>';
+                status.innerHTML = '<span style="color:#1877f2; font-weight:600;">Non connecté</span>';
             }
         }
-        function logout() {
-            localStorage.clear();
+function logout() {
+localStorage.clear();
             location.reload();
         }
-        async function loadPosts() {
-            try {
-                const res = await fetch('/api/posts');
-                if (!res.ok) throw new Error();
-                let posts = await res.json();
-                const feed = document.getElementById('feed');
+async function loadPosts() {
+try {
+const res = await fetch('/api/posts');
+if (!res.ok) throw new Error();
+let posts = await res.json();
+const feed = document.getElementById('feed');
                 feed.innerHTML = '';
-                if (posts.length === 0) {
+if (posts.length === 0) {
                     feed.innerHTML = '<div class="loading">Aucune publication pour le moment.</div>';
-                    return;
+return;
                 }
                 posts.sort((a, b) => new Date(b.time) - new Date(a.time))
                     .forEach(post => {
-                        const postDiv = document.createElement('div');
+const postDiv = document.createElement('div');
                         postDiv.className = 'post';
-                        const header = document.createElement('div');
+const header = document.createElement('div');
                         header.className = 'header';
-                        const avatar = document.createElement('div');
+const avatar = document.createElement('div');
                         avatar.className = 'avatar';
                         avatar.textContent = post.username.charAt(0).toUpperCase();
                         avatar.style.backgroundColor = getColor(post.username);
-                        const userInfo = document.createElement('div');
+if (post.avatar) {
+                            avatar.style.background = `url(${post.avatar})`;
+                            avatar.style.backgroundSize = 'cover';
+                            avatar.textContent = '';
+                        }
+const userInfo = document.createElement('div');
                         userInfo.className = 'user-info';
-                        const usernameLink = document.createElement('a');
+const usernameLink = document.createElement('a');
                         usernameLink.href = `/chat?seller=${encodeURIComponent(post.username)}`;
                         usernameLink.className = 'username';
                         usernameLink.textContent = post.username;
-                        const titleDiv = document.createElement('div');
+const titleDiv = document.createElement('div');
                         titleDiv.className = 'title';
                         titleDiv.textContent = post.title || 'Sans titre';
-                        const pricesDiv = document.createElement('div');
+const pricesDiv = document.createElement('div');
                         pricesDiv.className = 'prices';
                         pricesDiv.textContent = `${post.price || 'N/A'} € • Livraison ${post.shipping_price || 'N/A'} €`;
-                        const timeSpan = document.createElement('div');
+const timeSpan = document.createElement('div');
                         timeSpan.className = 'time';
                         timeSpan.textContent = new Date(post.time).toLocaleString('fr-FR');
                         userInfo.append(usernameLink, titleDiv, pricesDiv, timeSpan);
                         header.append(avatar, userInfo);
-                        const img = document.createElement('img');
+const img = document.createElement('img');
                         img.src = post.image_base64;
                         img.alt = 'Article';
                         postDiv.append(header, img);
                         feed.appendChild(postDiv);
                     });
             } catch (e) {
-                document.getElementById('feed').innerHTML = '<div class="loading">Erreur de chargement.</div>';
+document.getElementById('feed').innerHTML = '<div class="loading">Erreur de chargement.</div>';
             }
         }
+const urlParams = new URLSearchParams(window.location.search);
+const usernameParam = urlParams.get('username');
+const avatarParam = urlParams.get('avatar');
+if (usernameParam) localStorage.setItem('username', usernameParam);
+if (avatarParam) localStorage.setItem('avatar', avatarParam);
         updateAuthStatus();
         loadPosts();
-        setInterval(loadPosts, 30000);
-    </script>
+setInterval(loadPosts, 30000);
+</script>
 </body>
 </html>
