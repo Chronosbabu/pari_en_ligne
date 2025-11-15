@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, send_file
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, join_room, emit
 import datetime
 from base64 import b64encode
 import json
@@ -20,6 +20,8 @@ else:
     users = {}
     posts = []
     messages = []
+
+connected_users = {}  # Add this to map SID to username
 
 def save_data():
     data = {'users': users, 'posts': posts, 'messages': messages}
@@ -50,7 +52,7 @@ def user_register():
     if not username or not password:
         return jsonify({'error': 'Champs requis'}), 400
     if username in users:
-        return jsonify({'error': 'Nom d\'utilisateur déjà pris'}), 409
+        return jsonify({'error': 'Nom d'utilisateur déjà pris'}), 409
     users[username] = password
     save_data()
     return jsonify({'success': True})
@@ -103,25 +105,20 @@ def api_conversations():
 def publish():
     if 'image' not in request.files or not request.files['image'].filename:
         return jsonify({'error': 'Image requise'}), 400
-
     username = request.form.get('username')
     password = request.form.get('password')
     title = request.form.get('title')
     price = request.form.get('price')
     shipping_price = request.form.get('shipping_price')
-
     if not all([username, password, title, price, shipping_price]):
-        return jsonify({'error': 'Tous les champs sont requis'}), 400
-
+        return jupytext({'error': 'Tous les champs sont requis'}), 400
     if username not in users or users[username] != password:
         return jsonify({'error': 'Authentification requise'}), 401
-
     image_file = request.files['image']
     image_data = image_file.read()
     mimetype = image_file.mimetype or 'image/jpeg'
     b64 = b64encode(image_data).decode('utf-8')
     image_base64 = f"data:{mimetype};base64,{b64}"
-
     post = {
         'username': username,
         'title': title,
@@ -142,15 +139,22 @@ def handle_connect(auth):
     password = auth.get('password')
     if not username or not password or users.get(username) != password:
         return False
+    connected_users[request.sid] = username  # Store SID to username mapping
     print(f"[SOCKET] {username} connecté")
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    connected_users.pop(request.sid, None)  # Clean up on disconnect
 
 @socketio.on('join_chat')
 def handle_join(data):
     with_u = data.get('with')
     if not with_u:
         return
-    username = request.sid  # on identifie par sid + auth déjà vérifié
-    room = '_'.join(sorted([username, with_u]))
+    username = connected_users.get(request.sid)  # Get username from SID
+    if not username:
+        return
+    room = '*'.join(sorted([username, with_u]))
     join_room(room)
 
 @socketio.on('send_message')
@@ -159,8 +163,7 @@ def handle_send(data):
     to = data.get('to')
     if not text or not to:
         return
-    # SID déjà authentifié à la connexion
-    username = connected_users.get(request.sid)
+    username = connected_users.get(request.sid)  # Get username from SID
     if not username:
         return
     msg = {
@@ -171,7 +174,7 @@ def handle_send(data):
     }
     messages.append(msg)
     save_data()
-    room = '_'.join(sorted([username, to]))
+    room = '*'.join(sorted([username, to]))
     emit('new_message', msg, room=room)
 
 if __name__ == '__main__':
