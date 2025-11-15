@@ -31,7 +31,7 @@ def login_page():
 @app.route('/chat')
 def chat():
     return send_file('chat.html')
-@app.route('/conversations.html')
+@app.route('/conversations')
 def conversations_page():
     return send_file('conversations.html')
 @app.route('/api/posts')
@@ -79,6 +79,7 @@ def api_conversations():
         return jsonify({'error': 'Auth requise'}), 401
     conv = set()
     last_times = {}
+    last_texts = {}
     for m in messages:
         if m['from'] == username:
             other = m['to']
@@ -87,20 +88,11 @@ def api_conversations():
         else:
             continue
         conv.add(other)
-        last_times[other] = max(last_times.get(other, '0'), m['time'])
-    conv_list = sorted(conv, key=lambda u: last_times.get(u, '0'), reverse=True)
-    conv_dicts = []
-    for other in conv_list:
-        conv_msgs = [m for m in messages if set([m['from'], m['to']]) == set([username, other])]
-        if conv_msgs:
-            last_msg = max(conv_msgs, key=lambda m: m['time'])
-            last_text = last_msg['text']
-            last_time = last_msg['time']
-        else:
-            last_text = ''
-            last_time = '0'
-        conv_dicts.append({'other': other, 'last_text': last_text, 'last_time': last_time})
-    return jsonify(conv_dicts)
+        if m['time'] > last_times.get(other, '0'):
+            last_times[other] = m['time']
+            last_texts[other] = m['text']
+    conv_list = sorted(list(conv), key=lambda u: last_times.get(u, '0'), reverse=True)
+    return jsonify([{'user': u, 'last_time': last_times.get(u), 'last_text': last_texts.get(u)} for u in conv_list])
 @app.route('/publish', methods=['POST'])
 def publish():
     if 'image' not in request.files or not request.files['image'].filename:

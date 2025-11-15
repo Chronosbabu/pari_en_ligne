@@ -25,11 +25,10 @@
 <body>
     <header>
         <h1>🛒 Place de Marché</h1>
-        <div id="messagesIcon" style="margin-left: auto; margin-right: 20px;"></div>
+        <a href="/conversations" style="margin-left: 20px; font-size: 24px; text-decoration: none;">💬</a>
         <div id="authStatus">Chargement...</div>
     </header>
     <div id="feed"><div class="loading">Chargement...</div></div>
-
     <script>
         function getColor(name) {
             let hash = 0;
@@ -37,25 +36,19 @@
             const hue = Math.abs(hash % 360);
             return `hsl(${hue}, 70%, 50%)`;
         }
-
         function updateAuthStatus() {
             const status = document.getElementById('authStatus');
-            const messagesIcon = document.getElementById('messagesIcon');
             const username = localStorage.getItem('username');
             if (username) {
                 status.innerHTML = `Connecté : ${username} <button onclick="logout()" style="margin-left:15px; padding:5px 10px; background:#e4e6eb; border:none; border-radius:6px; cursor:pointer;">Déconnexion</button>`;
-                messagesIcon.innerHTML = '<a href="/conversations.html" style="font-size:24px; text-decoration:none; color:black;">💬</a>';
             } else {
                 status.innerHTML = '<a href="/login.html" style="color:#1877f2; font-weight:600; text-decoration:none;">Se connecter</a>';
-                messagesIcon.innerHTML = '';
             }
         }
-
         function logout() {
             localStorage.clear();
             location.reload();
         }
-
         async function loadPosts() {
             try {
                 const res = await fetch('/api/posts');
@@ -71,42 +64,32 @@
                     .forEach(post => {
                         const postDiv = document.createElement('div');
                         postDiv.className = 'post';
-
                         const header = document.createElement('div');
                         header.className = 'header';
-
                         const avatar = document.createElement('div');
                         avatar.className = 'avatar';
                         avatar.textContent = post.username.charAt(0).toUpperCase();
                         avatar.style.backgroundColor = getColor(post.username);
-
                         const userInfo = document.createElement('div');
                         userInfo.className = 'user-info';
-
                         const usernameLink = document.createElement('a');
-                        usernameLink.href = `/chat?seller=${encodeURIComponent(post.username)}`;  // ← CORRIGÉ ICI
+                        usernameLink.href = `/chat?seller=${encodeURIComponent(post.username)}`; // ← CORRIGÉ ICI
                         usernameLink.className = 'username';
                         usernameLink.textContent = post.username;
-
                         const titleDiv = document.createElement('div');
                         titleDiv.className = 'title';
                         titleDiv.textContent = post.title || 'Sans titre';
-
                         const pricesDiv = document.createElement('div');
                         pricesDiv.className = 'prices';
                         pricesDiv.textContent = `${post.price || 'N/A'} € • Livraison ${post.shipping_price || 'N/A'} €`;
-
                         const timeSpan = document.createElement('div');
                         timeSpan.className = 'time';
                         timeSpan.textContent = new Date(post.time).toLocaleString('fr-FR');
-
                         userInfo.append(usernameLink, titleDiv, pricesDiv, timeSpan);
                         header.append(avatar, userInfo);
-
                         const img = document.createElement('img');
                         img.src = post.image_base64;
                         img.alt = 'Article';
-
                         postDiv.append(header, img);
                         feed.appendChild(postDiv);
                     });
@@ -114,7 +97,6 @@
                 document.getElementById('feed').innerHTML = '<div class="loading">Erreur de chargement.</div>';
             }
         }
-
         updateAuthStatus();
         loadPosts();
         setInterval(loadPosts, 30000);

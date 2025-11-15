@@ -20,29 +20,24 @@
 </head>
 <body>
     <header>
-        <a href="/" style="font-size: 28px; margin-right: 20px; text-decoration:none; color:black;">←</a>
+        <a href="/conversations" style="font-size: 28px; margin-right: 20px; text-decoration:none; color:black;">←</a>
         <div class="avatar" id="sellerAvatar"></div>
         <div id="sellerName" style="font-weight:600; font-size:18px;"></div>
     </header>
-
     <div id="messages"></div>
-
     <div class="input-bar">
         <input type="text" id="messageInput" placeholder="Écris un message..." autocomplete="off">
         <button id="sendBtn">Envoyer</button>
     </div>
-
     <script>
         // Redirection si pas connecté
         if (!localStorage.getItem('username')) {
             const next = encodeURIComponent(location.href);
             location.href = `/login.html?next=${next}`;
         }
-
         const urlParams = new URLSearchParams(location.search);
         const seller = urlParams.get('seller');
         if (!seller) location.href = '/';
-
         document.getElementById('sellerName').textContent = seller;
         document.getElementById('sellerAvatar').textContent = seller.charAt(0).toUpperCase();
         document.getElementById('sellerAvatar').style.backgroundColor = (() => {
@@ -51,15 +46,12 @@
             const hue = Math.abs(hash % 360);
             return `hsl(${hue}, 70%, 50%)`;
         })();
-
         const username = localStorage.getItem('username');
         const password = localStorage.getItem('password');
         const messagesDiv = document.getElementById('messages');
-
         function scrollToBottom() {
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
-
         function addMessage(msg) {
             const bubble = document.createElement('div');
             bubble.className = 'bubble ' + (msg.from === username ? 'sent' : 'received');
@@ -67,7 +59,6 @@
             messagesDiv.appendChild(bubble);
             scrollToBottom();
         }
-
         // Chargement historique
         fetch(`/api/messages?with=${seller}&username=${username}&password=${password}`)
             .then(r => r.json())
@@ -75,13 +66,10 @@
                 msgs.forEach(addMessage);
                 scrollToBottom();
             });
-
         const socket = io({ auth: { username, password } });
-
         socket.on('new_message', msg => {
             addMessage(msg);
         });
-
         document.getElementById('sendBtn').onclick = () => {
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
@@ -91,7 +79,6 @@
                 input.value = '';
             }
         };
-
         document.getElementById('messageInput').addEventListener('keypress', e => {
             if (e.key === 'Enter') document.getElementById('sendBtn').click();
         });
