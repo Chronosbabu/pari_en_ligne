@@ -125,20 +125,11 @@ def handle_connect(auth):
     if not username or not password or users.get(username) != password:
         return False
     connected_users[request.sid] = username # Store SID to username mapping
+    join_room(username)
     print(f"[SOCKET] {username} connecté")
 @socketio.on('disconnect')
 def handle_disconnect():
     connected_users.pop(request.sid, None) # Clean up on disconnect
-@socketio.on('join_chat')
-def handle_join(data):
-    with_u = data.get('with')
-    if not with_u:
-        return
-    username = connected_users.get(request.sid) # Get username from SID
-    if not username:
-        return
-    room = '*'.join(sorted([username, with_u]))
-    join_room(room)
 @socketio.on('send_message')
 def handle_send(data):
     text = data.get('text', '').strip()
@@ -156,7 +147,6 @@ def handle_send(data):
     }
     messages.append(msg)
     save_data()
-    room = '*'.join(sorted([username, to]))
-    emit('new_message', msg, room=room)
+    emit('new_message', msg, room=to)
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
