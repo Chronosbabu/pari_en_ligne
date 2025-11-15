@@ -44,6 +44,19 @@ def chat():
 def get_posts():
     return jsonify(posts)
 
+@app.route('/register', methods=['POST'])
+def user_register():
+    data = request.get_json() or {}
+    username = data.get('username')
+    password = data.get('password')
+    if not username or not password:
+        return jsonify({'error': 'Champs requis'}), 400
+    if username in users:
+        return jsonify({'error': 'Nom d\'utilisateur déjà pris'}), 409
+    users[username] = password
+    save_data()
+    return jsonify({'success': True})
+
 @app.route('/login', methods=['POST'])
 def user_login():
     data = request.get_json() or {}
@@ -51,13 +64,11 @@ def user_login():
     password = data.get('password')
     if not username or not password:
         return jsonify({'error': 'Champs requis'}), 400
-    
-    if username in users and users[username] != password:
+    if username not in users:
+        return jsonify({'error': 'Utilisateur non trouvé'}), 404
+    if users[username] != password:
         return jsonify({'error': 'Mot de passe incorrect'}), 401
-    
-    users[username] = password
-    save_data()
-    return jsonify({'success': True, 'message': 'Connecté (ou compte créé si nouveau)'})
+    return jsonify({'success': True})
 
 @app.route('/api/messages')
 def api_messages():
@@ -104,10 +115,8 @@ def publish():
     if not all([username, password, title, price, shipping_price]):
         return jsonify({'error': 'Tous les champs sont requis'}), 400
 
-    if username in users and users[username] != password:
-        return jsonify({'error': 'Mot de passe incorrect'}), 401
-
-    users[username] = password
+    if username not in users or users[username] != password:
+        return jsonify({'error': 'Authentification requise'}), 401
 
     image_file = request.files['image']
     image_data = image_file.read()

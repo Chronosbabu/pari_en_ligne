@@ -33,7 +33,6 @@
     </div>
 
     <script>
-        // Redirection si pas connecté
         if (!localStorage.getItem('username')) {
             const next = encodeURIComponent(location.href);
             location.href = `/login.html?next=${next}`;
