@@ -53,7 +53,7 @@ def user_register():
         return jsonify({'error': 'Champs requis'}), 400
     if username in users:
         return jsonify({'error': "Nom d'utilisateur déjà pris"}), 409
-    users[username] = password
+    users[username] = {'password': password, 'avatar': None}
     save_data()
     return jsonify({'success': True})
 
@@ -66,8 +66,8 @@ def user_login():
         return jsonify({'error': 'Champs requis'}), 400
     if username not in users:
         return jsonify({'error': 'Utilisateur non trouvé'}), 404
-    if users[username] != password:
-        return jupytext({'error': 'Mot de passe incorrect'}), 401
+    if users[username]['password'] != password:
+        return jsonify({'error': 'Mot de passe incorrect'}), 401
     return jsonify({'success': True})
 
 @app.route('/publish', methods=['POST'])
@@ -82,11 +82,9 @@ def publish():
     avatar = request.form.get('avatar')
     if not all([username, password, title, price, shipping_price]):
         return jsonify({'error': 'Tous les champs sont requis'}), 400
-    if username not in users or users[username] != password:
+    if username not in users or users[username]['password'] != password:
         return jsonify({'error': 'Authentification requise'}), 401
-    if username not in users:
-        users[username] = {'avatar': avatar}
-    else:
+    if avatar:
         users[username]['avatar'] = avatar
     image_file = request.files['image']
     image_data = image_file.read()
@@ -111,8 +109,16 @@ def api_messages():
     with_u = request.args.get('with')
     username = request.args.get('username')
     pwd = request.args.get('password')
-    if not all([with_u, username, pwd]) or users.get(username) != pwd:
+    if not all([with_u, username]):
         return jsonify({'error': 'Auth requise'}), 401
+    if username not in users:
+        return jsonify({'error': 'Utilisateur non trouvé'}), 404
+    if pwd:
+        if users[username]['password'] != pwd:
+            return jsonify({'error': 'Auth requise'}), 401
+    else:
+        if users[username]['password'] is not None:
+            return jsonify({'error': 'Auth requise'}), 401
     conv_msgs = [m for m in messages if set([m['from'], m['to']]) == set([username, with_u])]
     conv_msgs.sort(key=lambda m: m['time'])
     return jsonify(conv_msgs)
@@ -121,8 +127,16 @@ def api_messages():
 def api_conversations():
     username = request.args.get('username')
     pwd = request.args.get('password')
-    if not username or not pwd or users.get(username) != pwd:
+    if not username:
         return jsonify({'error': 'Auth requise'}), 401
+    if username not in users:
+        return jsonify({'error': 'Utilisateur non trouvé'}), 404
+    if pwd:
+        if users[username]['password'] != pwd:
+            return jsonify({'error': 'Auth requise'}), 401
+    else:
+        if users[username]['password'] is not None:
+            return jsonify({'error': 'Auth requise'}), 401
     conv = set()
     last_times = {}
     last_texts = {}
@@ -146,15 +160,25 @@ def handle_connect(auth):
         return False
     username = auth.get('username')
     password = auth.get('password')
-    if not username or not password or users.get(username) != password:
+    if not username:
         return False
-    connected_users[request.sid] = username  # Store SID to username mapping
+    if username not in users:
+        users[username] = {'password': None, 'avatar': None}
+        save_data()
+    user = users[username]
+    if password:
+        if user['password'] is None or user['password'] != password:
+            return False
+    else:
+        if user['password'] is not None:
+            return False
+    connected_users[request.sid] = username
     join_room(username)
     print(f"[SOCKET] {username} connecté")
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    connected_users.pop(request.sid, None)  # Clean up on disconnect
+    connected_users.pop(request.sid, None)
 
 @socketio.on('send_message')
 def handle_send(data):
@@ -162,7 +186,7 @@ def handle_send(data):
     to = data.get('to')
     if not text or not to:
         return
-    username = connected_users.get(request.sid)  # Get username from SID
+    username = connected_users.get(request.sid)
     if not username:
         return
     msg = {
