@@ -16,6 +16,11 @@ if os.path.exists(DATA_FILE):
         users = data.get('users', {})
         posts = data.get('posts', [])
         messages = data.get('messages', [])
+        # Migration for old data
+        for username in list(users):
+            if not isinstance(users[username], dict):
+                old_pass = users[username]
+                users[username] = {'password': old_pass, 'avatar': None}
 else:
     users = {}
     posts = []
@@ -198,6 +203,7 @@ def handle_send(data):
     messages.append(msg)
     save_data()
     emit('new_message', msg, room=to)
+    emit('new_message', msg, room=username)  # Send to sender too for confirmation
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
