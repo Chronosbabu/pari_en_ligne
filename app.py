@@ -52,7 +52,7 @@ def user_register():
     if not username or not password:
         return jsonify({'error': 'Champs requis'}), 400
     if username in users:
-        return jsonify({'error': 'Nom d'utilisateur déjà pris'}), 409
+        return jsonify({'error': "Nom d'utilisateur déjà pris"}), 409
     users[username] = password
     save_data()
     return jsonify({'success': True})
@@ -111,7 +111,7 @@ def publish():
     price = request.form.get('price')
     shipping_price = request.form.get('shipping_price')
     if not all([username, password, title, price, shipping_price]):
-        return jupytext({'error': 'Tous les champs sont requis'}), 400
+        return jsonify({'error': 'Tous les champs sont requis'}), 400
     if username not in users or users[username] != password:
         return jsonify({'error': 'Authentification requise'}), 401
     image_file = request.files['image']
