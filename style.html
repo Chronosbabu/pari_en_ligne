@@ -25,6 +25,7 @@
 <body>
     <header>
         <h1>🛒 Place de Marché</h1>
+        <div id="messagesIcon" style="margin-left: auto; margin-right: 20px;"></div>
         <div id="authStatus">Chargement...</div>
     </header>
     <div id="feed"><div class="loading">Chargement...</div></div>
@@ -39,11 +40,14 @@
 
         function updateAuthStatus() {
             const status = document.getElementById('authStatus');
+            const messagesIcon = document.getElementById('messagesIcon');
             const username = localStorage.getItem('username');
             if (username) {
                 status.innerHTML = `Connecté : ${username} <button onclick="logout()" style="margin-left:15px; padding:5px 10px; background:#e4e6eb; border:none; border-radius:6px; cursor:pointer;">Déconnexion</button>`;
+                messagesIcon.innerHTML = '<a href="/conversations.html" style="font-size:24px; text-decoration:none; color:black;">💬</a>';
             } else {
                 status.innerHTML = '<a href="/login.html" style="color:#1877f2; font-weight:600; text-decoration:none;">Se connecter</a>';
+                messagesIcon.innerHTML = '';
             }
         }
 

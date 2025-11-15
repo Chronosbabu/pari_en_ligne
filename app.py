@@ -31,6 +31,9 @@ def login_page():
 @app.route('/chat')
 def chat():
     return send_file('chat.html')
+@app.route('/conversations.html')
+def conversations_page():
+    return send_file('conversations.html')
 @app.route('/api/posts')
 def get_posts():
     return jsonify(posts)
@@ -42,7 +45,7 @@ def user_register():
     if not username or not password:
         return jsonify({'error': 'Champs requis'}), 400
     if username in users:
-        return jupytext({'error': "Nom d'utilisateur déjà pris"}), 409
+        return jsonify({'error': "Nom d'utilisateur déjà pris"}), 409
     users[username] = password
     save_data()
     return jsonify({'success': True})
@@ -86,7 +89,18 @@ def api_conversations():
         conv.add(other)
         last_times[other] = max(last_times.get(other, '0'), m['time'])
     conv_list = sorted(conv, key=lambda u: last_times.get(u, '0'), reverse=True)
-    return jsonify(conv_list)
+    conv_dicts = []
+    for other in conv_list:
+        conv_msgs = [m for m in messages if set([m['from'], m['to']]) == set([username, other])]
+        if conv_msgs:
+            last_msg = max(conv_msgs, key=lambda m: m['time'])
+            last_text = last_msg['text']
+            last_time = last_msg['time']
+        else:
+            last_text = ''
+            last_time = '0'
+        conv_dicts.append({'other': other, 'last_text': last_text, 'last_time': last_time})
+    return jsonify(conv_dicts)
 @app.route('/publish', methods=['POST'])
 def publish():
     if 'image' not in request.files or not request.files['image'].filename:

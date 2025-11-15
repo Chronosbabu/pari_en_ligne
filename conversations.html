@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversations - Place de Marché</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 0;}
+        header {display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;}
+        h1 {margin: 0; font-size: 24px;}
+        #conversations {max-width: 800px; margin: 0 auto; padding: 20px 10px;}
+        .conv {background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; padding: 15px; display: flex; align-items: center; cursor: pointer;}
+        .avatar {width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 28px; margin-right: 15px; flex-shrink: 0;}
+        .conv-info {flex-grow: 1;}
+        .other {font-weight: 600; font-size: 17px; color: #1c1e21;}
+        .last-text {font-size: 14px; color: #606770; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;}
+        .last-time {font-size: 13px; color: #606770; text-align: right; flex-shrink: 0;}
+        .loading {text-align: center; padding: 40px; color: #606770; font-size: 18px;}
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" style="font-size: 28px; margin-right: 20px; text-decoration:none; color:black;">←</a>
+        <h1>Conversations</h1>
+    </header>
+    <div id="conversations"><div class="loading">Chargement...</div></div>
+
+    <script>
+        // Redirection si pas connecté
+        if (!localStorage.getItem('username')) {
+            const next = encodeURIComponent(location.href);
+            location.href = `/login.html?next=${next}`;
+        }
+
+        const username = localStorage.getItem('username');
+        const password = localStorage.getItem('password');
+        let convMap = new Map(); // To store conversations by other
+
+        function getColor(name) {
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            const hue = Math.abs(hash % 360);
+            return `hsl(${hue}, 70%, 50%)`;
+        }
+
+        function formatTime(timeStr) {
+            const date = new Date(timeStr);
+            return date.toLocaleString('fr-FR', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' });
+        }
+
+        function addOrUpdateConv(other, last_text, last_time) {
+            convMap.set(other, { last_text, last_time });
+            renderConvs();
+        }
+
+        function renderConvs() {
+            const convsDiv = document.getElementById('conversations');
+            convsDiv.innerHTML = '';
+            if (convMap.size === 0) {
+                convsDiv.innerHTML = '<div class="loading">Aucune conversation pour le moment.</div>';
+                return;
+            }
+            // Sort by last_time descending
+            const sorted = Array.from(convMap.entries()).sort((a, b) => new Date(b[1].last_time) - new Date(a[1].last_time));
+            sorted.forEach(([other, info]) => {
+                const convDiv = document.createElement('div');
+                convDiv.className = 'conv';
+                convDiv.onclick = () => location.href = `/chat?seller=${encodeURIComponent(other)}`;
+
+                const avatar = document.createElement('div');
+                avatar.className = 'avatar';
+                avatar.textContent = other.charAt(0).toUpperCase();
+                avatar.style.backgroundColor = getColor(other);
+
+                const convInfo = document.createElement('div');
+                convInfo.className = 'conv-info';
+
+                const otherName = document.createElement('div');
+                otherName.className = 'other';
+                otherName.textContent = other;
+
+                const lastText = document.createElement('div');
+                lastText.className = 'last-text';
+                lastText.textContent = info.last_text || 'Aucun message';
+
+                convInfo.append(otherName, lastText);
+
+                const lastTime = document.createElement('div');
+                lastTime.className = 'last-time';
+                lastTime.textContent = formatTime(info.last_time);
+
+                convDiv.append(avatar, convInfo, lastTime);
+                convsDiv.appendChild(convDiv);
+            });
+        }
+
+        async function loadConversations() {
+            try {
+                const res = await fetch(`/api/conversations?username=${username}&password=${password}`);
+                if (!res.ok) throw new Error();
+                const convs = await res.json();
+                convMap.clear();
+                convs.forEach(c => addOrUpdateConv(c.other, c.last_text, c.last_time));
+            } catch (e) {
+                document.getElementById('conversations').innerHTML = '<div class="loading">Erreur de chargement.</div>';
+            }
+        }
+
+        const socket = io({ auth: { username, password } });
+
+        socket.on('new_message', msg => {
+            const other = msg.from === username ? msg.to : msg.from;
+            addOrUpdateConv(other, msg.text, msg.time);
+        });
+
+        loadConversations();
+    </script>
+</body>
+</html>
