@@ -4,22 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conversations - Place de Marché</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body {font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 0;}
-        header {display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;}
-        h1 {margin: 0; font-size: 24px;}
-        #authStatus {font-size: 15px;}
+        body {font-family: 'Roboto', sans-serif; background: #f0f2f5; margin: 0; padding: 0; transition: all 0.3s ease;}
+        header {display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: linear-gradient(to bottom, white, #f9f9f9); box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;}
+        h1 {margin: 0; font-size: 24px; color: #333;}
+        #authStatus {font-size: 15px; color: #555;}
         #feed {max-width: 800px; margin: 0 auto; padding: 20px 10px;}
-        .post {background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; overflow: hidden;}
+        .post {background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;}
+        .post:hover {transform: translateY(-5px); box-shadow: 0 6px 16px rgba(0,0,0,0.12);}
         .header {display: flex; align-items: center; padding: 15px 15px 10px;}
-        .avatar {width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 28px; margin-right: 12px; flex-shrink: 0;}
+        .avatar {width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 28px; margin-right: 12px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
         .user-info {flex-grow: 1;}
-        .username {font-weight: 600; font-size: 15px; color: #1877f2; text-decoration: none; cursor: pointer;}
-        .title {font-size: 19px; font-weight: bold; color: #1c1e21; margin: 4px 0;}
+        .username {font-weight: 600; font-size: 15px; color: #1877f2; text-decoration: none; cursor: pointer; transition: color 0.2s;}
+        .username:hover {color: #0e5a9e;}
+        .title {font-size: 16px; font-weight: normal; color: #1c1e21; margin: 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .prices {font-size: 17px; font-weight: 600; color: #1877f2;}
         .time {font-size: 13px; color: #606770; margin-top: 4px;}
         img {width: 100%; height: auto; display: block;}
         .loading {text-align: center; padding: 40px; color: #606770; font-size: 18px;}
+        @media (max-width: 600px) {
+            h1 {font-size: 20px;}
+            #feed {padding: 10px;}
+            .post {border-radius: 8px; margin-bottom: 15px;}
+            .avatar {width: 40px; height: 40px; font-size: 20px;}
+            .header {padding: 10px;}
+            .title {font-size: 14px;}
+            .time {font-size: 12px;}
+            #authStatus {font-size: 13px;}
+        }
     </style>
 </head>
 <body>
@@ -45,7 +58,7 @@
             const status = document.getElementById('authStatus');
             const username = localStorage.getItem('username');
             if (username) {
-                status.innerHTML = `Connecté : ${username} <button onclick="logout()" style="margin-left:15px; padding:5px 10px; background:#e4e6eb; border:none; border-radius:6px; cursor:pointer;">Déconnexion</button>`;
+                status.innerHTML = `Connecté : ${username} <button onclick="logout()" style="margin-left:15px; padding:5px 10px; background:#e4e6eb; border:none; border-radius:6px; cursor:pointer; transition: background 0.2s;">Déconnexion</button>`;
             } else {
                 status.innerHTML = '<a href="/login.html" style="color:#1877f2; font-weight:600; text-decoration:none;">Se connecter</a>';
             }
