@@ -14,7 +14,7 @@
         .header {display: flex; align-items: center; padding: 15px 15px 10px;}
         .avatar {width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 28px; margin-right: 12px; flex-shrink: 0;}
         .user-info {flex-grow: 1;}
-        .username {font-weight: 600; font-size: 15px; color: #1877f2; text-decoration: none;}
+        .username {font-weight: 600; font-size: 15px; color: #1877f2; text-decoration: none; cursor: pointer;}
         .title {font-size: 19px; font-weight: bold; color: #1c1e21; margin: 4px 0;}
         .prices {font-size: 17px; font-weight: 600; color: #1877f2;}
         .time {font-size: 13px; color: #606770; margin-top: 4px;}
@@ -41,7 +41,7 @@
             const status = document.getElementById('authStatus');
             const username = localStorage.getItem('username');
             if (username) {
-                status.innerHTML = `Connecté : ${username} <button onclick="logout()" style="margin-left:15px; padding:5px 10px; background:#e4e6eb; border:none; border-radius:6px;">Déconnexion</button>`;
+                status.innerHTML = `Connecté : ${username} <button onclick="logout()" style="margin-left:15px; padding:5px 10px; background:#e4e6eb; border:none; border-radius:6px; cursor:pointer;">Déconnexion</button>`;
             } else {
                 status.innerHTML = '<a href="/login.html" style="color:#1877f2; font-weight:600; text-decoration:none;">Se connecter</a>';
             }
@@ -67,32 +67,42 @@
                     .forEach(post => {
                         const postDiv = document.createElement('div');
                         postDiv.className = 'post';
+
                         const header = document.createElement('div');
                         header.className = 'header';
+
                         const avatar = document.createElement('div');
                         avatar.className = 'avatar';
                         avatar.textContent = post.username.charAt(0).toUpperCase();
                         avatar.style.backgroundColor = getColor(post.username);
+
                         const userInfo = document.createElement('div');
                         userInfo.className = 'user-info';
+
                         const usernameLink = document.createElement('a');
-                        usernameLink.href = `chat.html?seller=${encodeURIComponent(post.username)}`;
+                        usernameLink.href = `/chat?seller=${encodeURIComponent(post.username)}`;  // ← CORRIGÉ ICI
                         usernameLink.className = 'username';
                         usernameLink.textContent = post.username;
+
                         const titleDiv = document.createElement('div');
                         titleDiv.className = 'title';
                         titleDiv.textContent = post.title || 'Sans titre';
+
                         const pricesDiv = document.createElement('div');
                         pricesDiv.className = 'prices';
                         pricesDiv.textContent = `${post.price || 'N/A'} € • Livraison ${post.shipping_price || 'N/A'} €`;
+
                         const timeSpan = document.createElement('div');
                         timeSpan.className = 'time';
                         timeSpan.textContent = new Date(post.time).toLocaleString('fr-FR');
+
                         userInfo.append(usernameLink, titleDiv, pricesDiv, timeSpan);
                         header.append(avatar, userInfo);
+
                         const img = document.createElement('img');
                         img.src = post.image_base64;
                         img.alt = 'Article';
+
                         postDiv.append(header, img);
                         feed.appendChild(postDiv);
                     });

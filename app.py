@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, send_file
-from flask_socketio import SocketIO, join_room, emit
+from flask_socketio import SocketIO
 import datetime
 from base64 import b64encode
 import json
@@ -20,8 +20,6 @@ else:
     users = {}
     posts = []
     messages = []
-
-connected_users = {}
 
 def save_data():
     data = {'users': users, 'posts': posts, 'messages': messages}
@@ -75,7 +73,7 @@ def api_messages():
     with_u = request.args.get('with')
     username = request.args.get('username')
     pwd = request.args.get('password')
-    if not with_u or not username or pwd is None or users.get(username) != pwd:
+    if not all([with_u, username, pwd]) or users.get(username) != pwd:
         return jsonify({'error': 'Auth requise'}), 401
     conv_msgs = [m for m in messages if set([m['from'], m['to']]) == set([username, with_u])]
     conv_msgs.sort(key=lambda m: m['time'])
@@ -85,7 +83,7 @@ def api_messages():
 def api_conversations():
     username = request.args.get('username')
     pwd = request.args.get('password')
-    if not username or pwd is None or users.get(username) != pwd:
+    if not username or not pwd or users.get(username) != pwd:
         return jsonify({'error': 'Auth requise'}), 401
     conv = set()
     last_times = {}
@@ -139,25 +137,19 @@ def publish():
 @socketio.on('connect')
 def handle_connect(auth):
     if not auth:
-        auth = {}
+        return False
     username = auth.get('username')
     password = auth.get('password')
-    if not username or password is None or users.get(username) != password:
+    if not username or not password or users.get(username) != password:
         return False
-    connected_users[request.sid] = username
-
-@socketio.on('disconnect')
-def handle_disconnect():
-    connected_users.pop(request.sid, None)
+    print(f"[SOCKET] {username} connecté")
 
 @socketio.on('join_chat')
 def handle_join(data):
     with_u = data.get('with')
     if not with_u:
         return
-    username = connected_users.get(request.sid)
-    if not username:
-        return
+    username = request.sid  # on identifie par sid + auth déjà vérifié
     room = '_'.join(sorted([username, with_u]))
     join_room(room)
 
@@ -167,6 +159,7 @@ def handle_send(data):
     to = data.get('to')
     if not text or not to:
         return
+    # SID déjà authentifié à la connexion
     username = connected_users.get(request.sid)
     if not username:
         return
