@@ -77,7 +77,6 @@
             });
 
         const socket = io({ auth: { username, password } });
-        socket.emit('join_chat', { with: seller });
 
         socket.on('new_message', msg => {
             addMessage(msg);
@@ -88,6 +87,7 @@
             const text = input.value.trim();
             if (text) {
                 socket.emit('send_message', { to: seller, text });
+                addMessage({ from: username, text: text, to: seller });
                 input.value = '';
             }
         };

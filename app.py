@@ -42,7 +42,7 @@ def user_register():
     if not username or not password:
         return jsonify({'error': 'Champs requis'}), 400
     if username in users:
-        return jsonify({'error': "Nom d'utilisateur déjà pris"}), 409
+        return jupytext({'error': "Nom d'utilisateur déjà pris"}), 409
     users[username] = password
     save_data()
     return jsonify({'success': True})
