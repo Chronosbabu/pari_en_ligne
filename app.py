@@ -4,12 +4,9 @@ import datetime
 from base64 import b64encode
 import json
 import os
-
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
-
 DATA_FILE = 'data.json'
-
 if os.path.exists(DATA_FILE):
     with open(DATA_FILE, 'r') as f:
         data = json.load(f)
@@ -20,30 +17,23 @@ else:
     users = {}
     posts = []
     messages = []
-
-connected_users = {}  # Add this to map SID to username
-
+connected_users = {} # Add this to map SID to username
 def save_data():
     data = {'users': users, 'posts': posts, 'messages': messages}
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, ensure_ascii=False)
-
 @app.route('/')
 def index():
     return send_file('style.html')
-
 @app.route('/login.html')
 def login_page():
     return send_file('login.html')
-
 @app.route('/chat')
 def chat():
     return send_file('chat.html')
-
 @app.route('/api/posts')
 def get_posts():
     return jsonify(posts)
-
 @app.route('/register', methods=['POST'])
 def user_register():
     data = request.get_json() or {}
@@ -56,7 +46,6 @@ def user_register():
     users[username] = password
     save_data()
     return jsonify({'success': True})
-
 @app.route('/login', methods=['POST'])
 def user_login():
     data = request.get_json() or {}
@@ -69,7 +58,6 @@ def user_login():
     if users[username] != password:
         return jsonify({'error': 'Mot de passe incorrect'}), 401
     return jsonify({'success': True})
-
 @app.route('/api/messages')
 def api_messages():
     with_u = request.args.get('with')
@@ -80,7 +68,6 @@ def api_messages():
     conv_msgs = [m for m in messages if set([m['from'], m['to']]) == set([username, with_u])]
     conv_msgs.sort(key=lambda m: m['time'])
     return jsonify(conv_msgs)
-
 @app.route('/api/conversations')
 def api_conversations():
     username = request.args.get('username')
@@ -100,7 +87,6 @@ def api_conversations():
         last_times[other] = max(last_times.get(other, '0'), m['time'])
     conv_list = sorted(conv, key=lambda u: last_times.get(u, '0'), reverse=True)
     return jsonify(conv_list)
-
 @app.route('/publish', methods=['POST'])
 def publish():
     if 'image' not in request.files or not request.files['image'].filename:
@@ -130,7 +116,6 @@ def publish():
     posts.append(post)
     save_data()
     return jsonify({'success': True})
-
 @socketio.on('connect')
 def handle_connect(auth):
     if not auth:
@@ -139,31 +124,28 @@ def handle_connect(auth):
     password = auth.get('password')
     if not username or not password or users.get(username) != password:
         return False
-    connected_users[request.sid] = username  # Store SID to username mapping
+    connected_users[request.sid] = username # Store SID to username mapping
     print(f"[SOCKET] {username} connecté")
-
 @socketio.on('disconnect')
 def handle_disconnect():
-    connected_users.pop(request.sid, None)  # Clean up on disconnect
-
+    connected_users.pop(request.sid, None) # Clean up on disconnect
 @socketio.on('join_chat')
 def handle_join(data):
     with_u = data.get('with')
     if not with_u:
         return
-    username = connected_users.get(request.sid)  # Get username from SID
+    username = connected_users.get(request.sid) # Get username from SID
     if not username:
         return
     room = '*'.join(sorted([username, with_u]))
     join_room(room)
-
 @socketio.on('send_message')
 def handle_send(data):
     text = data.get('text', '').strip()
     to = data.get('to')
     if not text or not to:
         return
-    username = connected_users.get(request.sid)  # Get username from SID
+    username = connected_users.get(request.sid) # Get username from SID
     if not username:
         return
     msg = {
@@ -176,6 +158,5 @@ def handle_send(data):
     save_data()
     room = '*'.join(sorted([username, to]))
     emit('new_message', msg, room=room)
-
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
