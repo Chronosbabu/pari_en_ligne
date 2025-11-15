@@ -52,13 +52,12 @@ def user_login():
     if not username or not password:
         return jsonify({'error': 'Champs requis'}), 400
     
-    # Si l'utilisateur existe déjà et mot de passe faux → erreur, sinon on crée/met à jour
     if username in users and users[username] != password:
         return jsonify({'error': 'Mot de passe incorrect'}), 401
     
     users[username] = password
     save_data()
-    return jsonify({'success': True})
+    return jsonify({'success': True, 'message': 'Connecté (ou compte créé si nouveau)'})
 
 @app.route('/api/messages')
 def api_messages():
@@ -110,7 +109,8 @@ def publish():
 
     users[username] = password
 
-    image_file = image_file.read()
+    image_file = request.files['image']
+    image_data = image_file.read()
     mimetype = image_file.mimetype or 'image/jpeg'
     b64 = b64encode(image_data).decode('utf-8')
     image_base64 = f"data:{mimetype};base64,{b64}"
@@ -127,7 +127,6 @@ def publish():
     save_data()
     return jsonify({'success': True})
 
-# ───── SocketIO Events ─────
 @socketio.on('connect')
 def handle_connect(auth):
     if not auth:
