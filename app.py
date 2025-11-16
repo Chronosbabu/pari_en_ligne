@@ -4,6 +4,7 @@ import datetime
 from base64 import b64encode
 import json
 import os
+import uuid
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -15,17 +16,19 @@ if os.path.exists(DATA_FILE):
     with open(DATA_FILE, 'r', encoding='utf-8') as f:
         data = json.load(f)
         users = data.get('users', {})
-        posts = data.get('posts', [])
+        products = data.get('products', [])
         messages = data.get('messages', [])
+        orders = data.get('orders', [])
 else:
     users = {}
-    posts = []
+    products = []
     messages = []
+    orders = []
 
 connected_users = {}  # sid → username
 
 def save_data():
-    data = {'users': users, 'posts': posts, 'messages': messages}
+    data = {'users': users, 'products': products, 'messages': messages, 'orders': orders}
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
@@ -41,9 +44,27 @@ def chat():
 def conversations_page():
     return send_file('conversations.html')
 
-@app.route('/api/posts')
-def get_posts():
-    return jsonify(posts)
+@app.route('/api/products')
+def get_products():
+    return jsonify(products)
+
+@app.route('/api/my_products')
+def get_my_products():
+    username = request.args.get('username')
+    pwd = request.args.get('password')
+    if not username or not pwd or username not in users or users[username]['password'] != pwd:
+        return jsonify({'error': 'Auth requise'}), 401
+    my = [p for p in products if p['username'] == username]
+    return jsonify(my)
+
+@app.route('/api/my_orders')
+def get_my_orders():
+    username = request.args.get('username')
+    pwd = request.args.get('password')
+    if not username or not pwd or username not in users or users[username]['password'] != pwd:
+        return jsonify({'error': 'Auth requise'}), 401
+    my = [o for o in orders if o.get('username') == username]
+    return jsonify(my)
 
 @app.route('/register', methods=['POST'])
 def user_register():
@@ -80,8 +101,11 @@ def publish():
     title = request.form.get('title')
     price = request.form.get('price')
     shipping_price = request.form.get('shipping_price')
+    category = request.form.get('category')
+    stock = request.form.get('stock')
+    desc = request.form.get('desc')
     avatar = request.form.get('avatar')
-    if not all([username, password, title, price, shipping_price]):
+    if not all([username, password, title, price, shipping_price, category, stock, desc]):
         return jsonify({'error': 'Tous les champs sont requis'}), 400
     if username not in users or users[username]['password'] != password:
         return jsonify({'error': 'Authentification requise'}), 401
@@ -92,16 +116,68 @@ def publish():
     mimetype = image_file.mimetype or 'image/jpeg'
     b64 = b64encode(image_data).decode('utf-8')
     image_base64 = f"data:{mimetype};base64,{b64}"
-    post = {
+    product = {
+        'id': str(uuid.uuid4()),
         'username': username,
         'title': title,
-        'price': price,
-        'shipping_price': shipping_price,
+        'price': float(price),
+        'shipping_price': float(shipping_price),
+        'category': category,
+        'stock': int(stock),
+        'desc': desc,
         'image_base64': image_base64,
         'time': datetime.datetime.now().isoformat(),
         'avatar': users[username].get('avatar')
     }
-    posts.append(post)
+    products.append(product)
+    save_data()
+    return jsonify({'success': True})
+
+@app.route('/delete_product', methods=['POST'])
+def delete_product():
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+    product_id = data.get('product_id')
+    if not username or not password or not product_id:
+        return jsonify({'error': 'Champs requis'}), 400
+    if username not in users or users[username]['password'] != password:
+        return jsonify({'error': 'Authentification requise'}), 401
+    global products
+    products = [p for p in products if not (p['id'] == product_id and p['username'] == username)]
+    save_data()
+    return jsonify({'success': True})
+
+@app.route('/edit_product', methods=['POST'])
+def edit_product():
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+    product_id = data.get('product_id')
+    updates = data.get('updates')
+    if not username or not password or not product_id or not updates:
+        return jsonify({'error': 'Champs requis'}), 400
+    if username not in users or users[username]['password'] != password:
+        return jsonify({'error': 'Authentification requise'}), 401
+    for p in products:
+        if p['id'] == product_id and p['username'] == username:
+            for key, value in updates.items():
+                if key in ['price', 'shipping_price']:
+                    value = float(value)
+                elif key == 'stock':
+                    value = int(value)
+                p[key] = value
+            save_data()
+            return jsonify({'success': True})
+    return jsonify({'error': 'Produit non trouvé'}), 404
+
+@app.route('/submit_order', methods=['POST'])
+def submit_order():
+    data = request.get_json()
+    if not data.get('items') or not data.get('total'):
+        return jsonify({'error': 'Données invalides'}), 400
+    data['time'] = datetime.datetime.now().isoformat()
+    orders.append(data)
     save_data()
     return jsonify({'success': True})
 
@@ -149,9 +225,7 @@ def handle_connect(auth):
         return False
     username = auth.get('username')
     password = auth.get('password')
-    if not username or username not in users:
-        return False
-    if users[username]['password'] != password:
+    if not username or username not in users or users[username]['password'] != password:
         return False
     connected_users[request.sid] = username
     join_room(username)
@@ -180,7 +254,6 @@ def handle_send(data):
     }
     messages.append(msg)
     save_data()
-    # On envoie aux deux (expéditeur + destinataire) → confirmation serveur
     emit('new_message', msg, room=username)
     if to != username:
         emit('new_message', msg, room=to)
