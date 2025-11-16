@@ -1,4 +1,3 @@
-# Fichier du serveur central pour le vente en ligne
 from flask import Flask, request, jsonify, send_file
 from flask_socketio import SocketIO, join_room, emit
 import datetime
@@ -10,28 +9,25 @@ app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 DATA_FILE = 'data.json'
+
+# Chargement des données
 if os.path.exists(DATA_FILE):
-    with open(DATA_FILE, 'r') as f:
+    with open(DATA_FILE, 'r', encoding='utf-8') as f:
         data = json.load(f)
         users = data.get('users', {})
         posts = data.get('posts', [])
         messages = data.get('messages', [])
-        # Migration for old data
-        for username in list(users):
-            if not isinstance(users[username], dict):
-                old_pass = users[username]
-                users[username] = {'password': old_pass, 'avatar': None}
 else:
     users = {}
     posts = []
     messages = []
 
-connected_users = {}  # Add this to map SID to username
+connected_users = {}  # sid → username
 
 def save_data():
     data = {'users': users, 'posts': posts, 'messages': messages}
-    with open(DATA_FILE, 'w') as f:
-        json.dump(data, f, ensure_ascii=False)
+    with open(DATA_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
 @app.route('/')
 def index():
@@ -114,16 +110,10 @@ def api_messages():
     with_u = request.args.get('with')
     username = request.args.get('username')
     pwd = request.args.get('password')
-    if not all([with_u, username]):
+    if not all([with_u, username, pwd]):
         return jsonify({'error': 'Auth requise'}), 401
-    if username not in users:
-        return jsonify({'error': 'Utilisateur non trouvé'}), 404
-    if pwd:
-        if users[username]['password'] != pwd:
-            return jsonify({'error': 'Auth requise'}), 401
-    else:
-        if users[username]['password'] is not None:
-            return jsonify({'error': 'Auth requise'}), 401
+    if username not in users or users[username]['password'] != pwd:
+        return jsonify({'error': 'Auth requise'}), 401
     conv_msgs = [m for m in messages if set([m['from'], m['to']]) == set([username, with_u])]
     conv_msgs.sort(key=lambda m: m['time'])
     return jsonify(conv_msgs)
@@ -132,16 +122,10 @@ def api_messages():
 def api_conversations():
     username = request.args.get('username')
     pwd = request.args.get('password')
-    if not username:
+    if not username or not pwd:
         return jsonify({'error': 'Auth requise'}), 401
-    if username not in users:
-        return jsonify({'error': 'Utilisateur non trouvé'}), 404
-    if pwd:
-        if users[username]['password'] != pwd:
-            return jsonify({'error': 'Auth requise'}), 401
-    else:
-        if users[username]['password'] is not None:
-            return jsonify({'error': 'Auth requise'}), 401
+    if username not in users or users[username]['password'] != pwd:
+        return jsonify({'error': 'Auth requise'}), 401
     conv = set()
     last_times = {}
     last_texts = {}
@@ -165,25 +149,19 @@ def handle_connect(auth):
         return False
     username = auth.get('username')
     password = auth.get('password')
-    if not username:
+    if not username or username not in users:
         return False
-    if username not in users:
-        users[username] = {'password': None, 'avatar': None}
-        save_data()
-    user = users[username]
-    if password:
-        if user['password'] is None or user['password'] != password:
-            return False
-    else:
-        if user['password'] is not None:
-            return False
+    if users[username]['password'] != password:
+        return False
     connected_users[request.sid] = username
     join_room(username)
-    print(f"[SOCKET] {username} connecté")
+    print(f"[SOCKET] {username} connecté (sid {request.sid})")
+    return True
 
 @socketio.on('disconnect')
 def handle_disconnect():
     connected_users.pop(request.sid, None)
+    print(f"[SOCKET] Déconnexion {request.sid}")
 
 @socketio.on('send_message')
 def handle_send(data):
@@ -202,8 +180,10 @@ def handle_send(data):
     }
     messages.append(msg)
     save_data()
-    emit('new_message', msg, room=to)
-    emit('new_message', msg, room=username)  # Send to sender too for confirmation
+    # On envoie aux deux (expéditeur + destinataire) → confirmation serveur
+    emit('new_message', msg, room=username)
+    if to != username:
+        emit('new_message', msg, room=to)
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
