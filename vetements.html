@@ -72,13 +72,11 @@
             </div>
         </div>
     </nav>
-
     <!-- Catalogue Vêtements -->
     <div class="container my-5">
         <h2 class="text-center mb-4" style="color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Produits Vêtements</h2>
         <div class="row" id="products"></div>
     </div>
-
     <!-- Fiche Produit (Modal) -->
     <div class="modal fade" id="productModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -103,18 +101,15 @@
             </div>
         </div>
     </div>
-
     <!-- Footer -->
     <footer class="footer text-center">
         <p>&copy; 2023 Mon E-Shop. Tous droits réservés.</p>
     </footer>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let products = [];
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         let currentProduct = null;
-
         function loadProducts() {
             fetch('/api/products')
                 .then(res => res.json())
@@ -135,7 +130,6 @@
                     `).join('');
                 }).catch(() => alert('Erreur de chargement des produits'));
         }
-
         function viewProduct(id) {
             currentProduct = products.find(p => p.id === id);
             document.getElementById('productTitle').textContent = currentProduct.title;
@@ -148,13 +142,11 @@
             document.getElementById('sellerLink').href = `/chat?with=${currentProduct.username}`;
             new bootstrap.Modal(document.getElementById('productModal')).show();
         }
-
         function addToCart(product) {
             cart.push(product);
             localStorage.setItem('cart', JSON.stringify(cart));
             alert('Produit ajouté au panier !');
         }
-
         // Initialisation
         loadProducts();
     </script>

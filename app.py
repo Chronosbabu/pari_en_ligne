@@ -35,6 +35,18 @@ def chat():
 @app.route('/conversations')
 def conversations_page():
     return send_file('conversations.html')
+@app.route('/electronique')
+def electronique():
+    return send_file('electronique.html')
+@app.route('/vetements')
+def vetements():
+    return send_file('vetements.html')
+@app.route('/maison')
+def maison():
+    return send_file('maison.html')
+@app.route('/cuisine')
+def cuisine():
+    return send_file('cuisine.html')
 @app.route('/api/products')
 def get_products():
     return jsonify(products)
