@@ -28,25 +28,25 @@ def save_data():
         json.dump(data, f, ensure_ascii=False, indent=2)
 @app.route('/')
 def index():
-    return send_file('style.html')
+    return send_file('html/style.html')
 @app.route('/chat')
 def chat():
-    return send_file('chat.html')
+    return send_file('html/chat.html')
 @app.route('/conversations')
 def conversations_page():
-    return send_file('conversations.html')
+    return send_file('html/conversations.html')
 @app.route('/electronique')
 def electronique():
-    return send_file('electronique.html')
+    return send_file('html/electronique.html')
 @app.route('/vetements')
 def vetements():
-    return send_file('vetements.html')
+    return send_file('html/vetements.html')
 @app.route('/maison')
 def maison():
-    return send_file('maison.html')
+    return send_file('html/maison.html')
 @app.route('/cuisine')
 def cuisine():
-    return send_file('cuisine.html')
+    return send_file('html/cuisine.html')
 @app.route('/api/products')
 def get_products():
     return jsonify(products)
