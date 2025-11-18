@@ -171,7 +171,7 @@ def api_messages():
     if not all([with_u, username, pwd]):
         return jsonify({'error': 'Auth requise'}), 401
     if username not in users or users[username]['password'] != pwd:
-        return jupytext({'error': 'Auth requise'}), 401
+        return jsonify({'error': 'Auth requise'}), 401
     conv_msgs = [m for m in messages if set([m['from'], m['to']]) == set([username, with_u])]
     conv_msgs.sort(key=lambda m: m['time'])
     return jsonify(conv_msgs)
