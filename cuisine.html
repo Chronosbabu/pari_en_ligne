@@ -21,6 +21,7 @@
             border-radius: 15px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             transition: transform 0.3s;
+            background: white;
         }
         .card:hover {
             transform: translateY(-5px);
@@ -34,16 +35,28 @@
             background: linear-gradient(45deg, #764ba2, #667eea);
         }
         .product-img {
-            height: 200px;
+            height: 250px;
             object-fit: cover;
-            border-radius: 10px;
+            border-radius: 15px 15px 0 0;
+        }
+        .footer {
+            background: #333;
+            color: white;
+            padding: 20px 0;
         }
         .modal-content {
             border-radius: 15px;
+            background: linear-gradient(135deg, #f6f9fc 0%, #e9ecef 100%);
+        }
+        @media (max-width: 768px) {
+            .product-img {
+                height: 200px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
             <a class="navbar-brand" href="/"><i class="fas fa-shopping-cart"></i> Mon E-Shop</a>
@@ -52,24 +65,20 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="/">Retour à l'Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/chat">Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/conversations">Conversations</a></li>
                 </ul>
             </div>
         </div>
     </nav>
+
+    <!-- Catalogue Cuisine -->
     <div class="container my-5">
-        <h2>Produits Cuisine</h2>
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <select class="form-select" id="sort">
-                    <option value="name">Trier par nom</option>
-                    <option value="price">Trier par prix</option>
-                    <option value="popularity">Trier par popularité</option>
-                </select>
-            </div>
-        </div>
+        <h2 class="text-center mb-4" style="color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Produits Cuisine</h2>
         <div class="row" id="products"></div>
     </div>
+
     <!-- Fiche Produit (Modal) -->
     <div class="modal fade" id="productModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -79,8 +88,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <img id="productImage" class="img-fluid mb-3" src="">
-                    <p id="productDescription"></p>
+                    <img id="productImage" class="img-fluid mb-3 rounded" src="" style="max-height: 400px; object-fit: contain;">
+                    <p id="productDescription" class="lead"></p>
                     <p><strong>Prix: </strong><span id="productPrice"></span> €</p>
                     <p><strong>Frais de livraison: </strong><span id="productShipping"></span> €</p>
                     <p><strong>Quantité disponible: </strong><span id="productStock"></span></p>
@@ -94,41 +103,39 @@
             </div>
         </div>
     </div>
-    <footer class="footer text-center" style="background: #333; color: white; padding: 20px 0;">
+
+    <!-- Footer -->
+    <footer class="footer text-center">
         <p>&copy; 2023 Mon E-Shop. Tous droits réservés.</p>
     </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let products = [];
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         let currentProduct = null;
-        const category = 'Cuisine';
 
-        function loadProducts(sort = 'name') {
+        function loadProducts() {
             fetch('/api/products')
                 .then(res => res.json())
                 .then(data => {
-                    products = data.filter(p => p.category === category);
-                    products.sort((a, b) => {
-                        if (sort === 'price') return a.price - b.price;
-                        if (sort === 'popularity') return b.stock - a.stock;
-                        return a.title.localeCompare(b.title);
-                    });
+                    products = data.filter(p => p.category === 'Cuisine');
                     document.getElementById('products').innerHTML = products.map(p => `
                         <div class="col-md-3 mb-4">
                             <div class="card">
-                                <img src="${p.image_base64}" class="card-img-top product-img" alt="${p.title}">
-                                <div class="card-body">
-                                    <h5>${p.title}</h5>
-                                    <p>${p.price} €</p>
-                                    <p>Vendeur: ${p.username}</p>
-                                    <button class="btn btn-primary" onclick="viewProduct('${p.id}')">Voir</button>
+                                <img src="${p.image_base64}" class="product-img" alt="${p.title}">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">${p.title}</h5>
+                                    <p class="card-text">${p.price} € (Livraison: ${p.shipping_price} €)</p>
+                                    <p class="text-muted">Vendeur: ${p.username}</p>
+                                    <button class="btn btn-primary btn-sm" onclick="viewProduct('${p.id}')">Voir Détails</button>
                                 </div>
                             </div>
                         </div>
                     `).join('');
                 }).catch(() => alert('Erreur de chargement des produits'));
         }
+
         function viewProduct(id) {
             currentProduct = products.find(p => p.id === id);
             document.getElementById('productTitle').textContent = currentProduct.title;
@@ -141,15 +148,14 @@
             document.getElementById('sellerLink').href = `/chat?with=${currentProduct.username}`;
             new bootstrap.Modal(document.getElementById('productModal')).show();
         }
+
         function addToCart(product) {
             cart.push(product);
             localStorage.setItem('cart', JSON.stringify(cart));
             alert('Produit ajouté au panier !');
         }
-        document.getElementById('sort').addEventListener('change', () => {
-            const sort = document.getElementById('sort').value;
-            loadProducts(sort);
-        });
+
+        // Initialisation
         loadProducts();
     </script>
 </body>
