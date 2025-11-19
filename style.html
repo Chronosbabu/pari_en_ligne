@@ -94,6 +94,7 @@
             </div>
         </div>
     </nav>
+
     <!-- Page Accueil -->
     <div id="home" class="page">
         <div class="hero">
@@ -111,10 +112,11 @@
                 <div class="col-md-3"><a href="/maison" style="text-decoration: none;"><div class="card p-3 text-center"><i class="fas fa-home fa-3x"></i><h5>Maison</h5></div></a></div>
                 <div class="col-md-3"><a href="/cuisine" style="text-decoration: none;"><div class="card p-3 text-center"><i class="fas fa-utensils fa-3x"></i><h5>Cuisine</h5></div></a></div>
             </div>
-            <h2 class="mt-5">Promotions</h2>
-            <div class="row" id="promotions"></div>
+            <!-- Bloc Promotions complètement désactivé et vidé -->
+            <div id="promotions" style="display:none;"></div>
         </div>
     </div>
+
     <!-- Catalogue -->
     <div id="catalog" class="page hidden">
         <div class="container my-5">
@@ -140,6 +142,7 @@
             <div class="row" id="products"></div>
         </div>
     </div>
+
     <!-- Fiche Produit (Modal) -->
     <div class="modal fade" id="productModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -164,6 +167,7 @@
             </div>
         </div>
     </div>
+
     <!-- Modal Ajouter/Modifier Produit -->
     <div class="modal fade" id="publishModal" tabindex="-1">
         <div class="modal-dialog">
@@ -192,6 +196,7 @@
             </div>
         </div>
     </div>
+
     <!-- Panier -->
     <div id="cart" class="page hidden">
         <div class="container my-5">
@@ -201,6 +206,7 @@
             <button class="btn btn-primary" onclick="showPage('checkout')">Passer la Commande</button>
         </div>
     </div>
+
     <!-- Checkout -->
     <div id="checkout" class="page hidden">
         <div class="container my-5">
@@ -226,6 +232,7 @@
             </form>
         </div>
     </div>
+
     <!-- Compte Utilisateur -->
     <div id="account" class="page hidden">
         <div class="container my-5">
@@ -254,6 +261,7 @@
             </div>
         </div>
     </div>
+
     <!-- Admin -->
     <div id="admin" class="page hidden">
         <div class="container my-5">
@@ -262,16 +270,19 @@
             <div id="adminProducts"></div>
         </div>
     </div>
+
     <!-- Footer -->
     <footer class="footer text-center">
-        <p>&copy; 2023 Mon E-Shop. Tous droits réservés.</p>
+        <p>© 2025 Mon E-Shop. Tous droits réservés.</p>
     </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let products = [];
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         let currentProduct = null;
         let editMode = false;
+
         // Fonctions
         function showPage(page) {
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
@@ -280,8 +291,9 @@
             if (page === 'cart') loadCart();
             if (page === 'account') loadAccount();
             if (page === 'admin') loadAdmin();
-            if (page === 'home') loadPromotions();
+            if (page === 'home') loadPromotions(); // reste appelé mais ne fait rien
         }
+
         function updateAuth() {
             const username = localStorage.getItem('username');
             if (username) {
@@ -297,15 +309,18 @@
                 document.getElementById('adminLink').style.display = 'none';
             }
         }
+
         function logout() {
             localStorage.removeItem('username');
             localStorage.removeItem('password');
             updateAuth();
             showPage('home');
         }
+
         function normalizeString(str) {
             return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         }
+
         function loadProducts(filter = '', sort = 'name', search = '') {
             fetch('/api/products')
                 .then(res => res.json())
@@ -316,7 +331,7 @@
                     if (search) filtered = filtered.filter(p => p.title.toLowerCase().includes(search.toLowerCase()));
                     filtered.sort((a, b) => {
                         if (sort === 'price') return a.price - b.price;
-                        if (sort === 'popularity') return b.stock - a.stock; // Simulé par stock
+                        if (sort === 'popularity') return b.stock - a.stock;
                         return a.title.localeCompare(b.title);
                     });
                     document.getElementById('products').innerHTML = filtered.map(p => `
@@ -334,6 +349,7 @@
                     `).join('');
                 }).catch(() => alert('Erreur de chargement des produits'));
         }
+
         function viewProduct(id) {
             currentProduct = products.find(p => p.id === id);
             document.getElementById('productTitle').textContent = currentProduct.title;
@@ -346,11 +362,13 @@
             document.getElementById('sellerLink').href = `/chat?with=${currentProduct.username}`;
             new bootstrap.Modal(document.getElementById('productModal')).show();
         }
+
         function addToCart(product) {
             cart.push(product);
             localStorage.setItem('cart', JSON.stringify(cart));
             alert('Produit ajouté au panier !');
         }
+
         function loadCart() {
             document.getElementById('cartItems').innerHTML = cart.map((p, i) => `
                 <div class="card mb-3">
@@ -365,11 +383,13 @@
             `).join('');
             document.getElementById('total').textContent = cart.reduce((sum, p) => sum + parseFloat(p.price), 0);
         }
+
         function removeFromCart(index) {
             cart.splice(index, 1);
             localStorage.setItem('cart', JSON.stringify(cart));
             loadCart();
         }
+
         function loadAdmin() {
             const username = localStorage.getItem('username');
             const password = localStorage.getItem('password');
@@ -392,6 +412,7 @@
                     `).join('');
                 }).catch(() => alert('Erreur de chargement'));
         }
+
         function showPublishForm(mode = 'add', id = null) {
             editMode = mode === 'edit';
             document.getElementById('publishTitle').textContent = editMode ? 'Modifier Produit' : 'Ajouter Produit';
@@ -403,12 +424,12 @@
                 document.getElementById('category').value = currentProduct.category;
                 document.getElementById('stock').value = currentProduct.stock;
                 document.getElementById('desc').value = currentProduct.desc;
-                // Image not edited for simplicity
             } else {
                 document.getElementById('publishForm').reset();
             }
             new bootstrap.Modal(document.getElementById('publishModal')).show();
         }
+
         function deleteProduct(id) {
             if (!confirm('Confirmer la suppression ?')) return;
             const username = localStorage.getItem('username');
@@ -427,9 +448,11 @@
                 }
               });
         }
+
         function editProduct(id) {
             showPublishForm('edit', id);
         }
+
         function loadAccount() {
             updateAuth();
             const username = localStorage.getItem('username');
@@ -453,24 +476,13 @@
                     }).catch(() => alert('Erreur de chargement des commandes'));
             }
         }
+
+        // === PROMOTIONS DÉSACTIVÉES COMPLÈTEMENT ===
         function loadPromotions() {
-            fetch('/api/products')
-                .then(res => res.json())
-                .then(data => {
-                    const promos = data.slice(0, 3); // 3 premiers comme promos
-                    document.getElementById('promotions').innerHTML = promos.map(p => `
-                        <div class="col-md-4">
-                            <div class="card">
-                                <img src="${p.image_base64}" class="card-img-top product-img" alt="${p.title}">
-                                <div class="card-body">
-                                    <h5>${p.title}</h5>
-                                    <p class="text-danger">${p.price} € <del>${parseFloat(p.price) + 200}€</del></p>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                });
+            // On ne charge plus rien sur la page d'accueil
+            document.getElementById('promotions').innerHTML = '';
         }
+
         // Événements
         document.getElementById('categoryFilter').addEventListener('change', () => {
             const filter = document.getElementById('categoryFilter').value;
@@ -478,12 +490,14 @@
             const search = document.getElementById('searchInput').value;
             loadProducts(filter, sort, search);
         });
+
         document.getElementById('sort').addEventListener('change', () => {
             const filter = document.getElementById('categoryFilter').value;
             const sort = document.getElementById('sort').value;
             const search = document.getElementById('searchInput').value;
             loadProducts(filter, sort, search);
         });
+
         document.getElementById('searchForm').addEventListener('submit', e => {
             e.preventDefault();
             const filter = document.getElementById('categoryFilter').value;
@@ -491,6 +505,7 @@
             const search = document.getElementById('searchInput').value;
             loadProducts(filter, sort, search);
         });
+
         document.getElementById('login').addEventListener('submit', e => {
             e.preventDefault();
             const username = document.getElementById('username').value;
@@ -503,7 +518,7 @@
               .then(data => {
                 if (data.success) {
                     localStorage.setItem('username', username);
-                    localStorage.setItem('password', password); // Not secure, use tokens in prod
+                    localStorage.setItem('password', password);
                     updateAuth();
                     loadAccount();
                 } else {
@@ -511,6 +526,7 @@
                 }
               });
         });
+
         document.getElementById('register').addEventListener('submit', e => {
             e.preventDefault();
             const username = document.getElementById('reg_username').value;
@@ -528,6 +544,7 @@
                 }
               });
         });
+
         document.getElementById('publishForm').addEventListener('submit', e => {
             e.preventDefault();
             const username = localStorage.getItem('username');
@@ -580,6 +597,7 @@
                     });
             }
         });
+
         document.getElementById('checkoutForm').addEventListener('submit', e => {
             e.preventDefault();
             const username = localStorage.getItem('username') || 'guest';
@@ -588,7 +606,7 @@
             const adresse = document.getElementById('adresse').value;
             const telephone = document.getElementById('telephone').value;
             const payment = document.getElementById('payment').value;
-            const total = cart.reduce((sum, p) => sum + parseFloat(p.price), 0) + 5; // + shipping fixe
+            const total = cart.reduce((sum, p) => sum + parseFloat(p.price), 0) + 5;
             const order = {username, nom, prenom, adresse, telephone, payment, items: cart, total};
             fetch('/submit_order', {
                 method: 'POST',
@@ -606,6 +624,7 @@
                 }
               });
         });
+
         // Initialisation
         updateAuth();
         showPage('home');
