@@ -110,11 +110,14 @@
         let products = [];
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         let currentProduct = null;
+        function normalizeString(str) {
+            return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
         function loadProducts() {
             fetch('/api/products')
                 .then(res => res.json())
                 .then(data => {
-                    products = data.filter(p => p.category === 'Cuisine');
+                    products = data.filter(p => normalizeString(p.category) === normalizeString('Cuisine'));
                     document.getElementById('products').innerHTML = products.map(p => `
                         <div class="col-md-3 mb-4">
                             <div class="card">

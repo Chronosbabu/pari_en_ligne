@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vêtements - Mon E-Shop</title>
+    <title>Électronique - Mon E-Shop</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -72,9 +72,9 @@
             </div>
         </div>
     </nav>
-    <!-- Catalogue Vêtements -->
+    <!-- Catalogue Électronique -->
     <div class="container my-5">
-        <h2 class="text-center mb-4" style="color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Produits Vêtements</h2>
+        <h2 class="text-center mb-4" style="color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Produits Électroniques</h2>
         <div class="row" id="products"></div>
     </div>
     <!-- Fiche Produit (Modal) -->
@@ -117,7 +117,7 @@
             fetch('/api/products')
                 .then(res => res.json())
                 .then(data => {
-                    products = data.filter(p => normalizeString(p.category) === normalizeString('Vêtements'));
+                    products = data.filter(p => normalizeString(p.category) === normalizeString('Électronique'));
                     document.getElementById('products').innerHTML = products.map(p => `
                         <div class="col-md-3 mb-4">
                             <div class="card">

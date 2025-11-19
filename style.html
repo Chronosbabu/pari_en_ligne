@@ -303,13 +303,16 @@
             updateAuth();
             showPage('home');
         }
+        function normalizeString(str) {
+            return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
         function loadProducts(filter = '', sort = 'name', search = '') {
             fetch('/api/products')
                 .then(res => res.json())
                 .then(data => {
                     products = data;
                     let filtered = products;
-                    if (filter) filtered = filtered.filter(p => p.category === filter);
+                    if (filter) filtered = filtered.filter(p => normalizeString(p.category) === normalizeString(filter));
                     if (search) filtered = filtered.filter(p => p.title.toLowerCase().includes(search.toLowerCase()));
                     filtered.sort((a, b) => {
                         if (sort === 'price') return a.price - b.price;
