@@ -3,631 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Site d'Achat et Livraison en Ligne</title>
-    <!-- Bootstrap pour un design responsive et joli -->
+    <title>Mon E-Shop - Achat & Livraison</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
-        }
-        .navbar {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-        }
-        .hero {
-            background: url('https://via.placeholder.com/1920x600?text=Bienvenue+sur+notre+site') no-repeat center center;
-            background-size: cover;
-            height: 60vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        .btn-primary {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            border: none;
-            border-radius: 25px;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(45deg, #764ba2, #667eea);
-        }
-        .footer {
-            background: #333;
-            color: white;
-            padding: 20px 0;
-        }
-        .product-img {
-            height: 200px;
-            object-fit: cover;
-            border-radius: 10px;
-        }
-        .hidden {
-            display: none;
-        }
-        .modal-content {
-            border-radius: 15px;
-        }
-        @media (max-width: 768px) {
-            .hero {
-                height: 40vh;
-            }
-            .card {
-                margin-bottom: 20px;
-            }
-        }
+        body {font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; padding: 0; color: #333;}
+        .navbar {background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); box-shadow: 0 2px 10px rgba(0,0,0,0.1);}
+        .hero {background: url('https://via.placeholder.com/1920x700?text=Mon+E-Shop') center/cover no-repeat; height: 70vh; display: flex; align-items: center; justify-content: center; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.7);}
+        .card-cat {background: rgba(255,255,255,0.9); border-radius: 20px; padding: 30px; text-align: center; transition: 0.3s; box-shadow: 0 8px 20px rgba(0,0,0,0.2);}
+        .card-cat:hover {transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.3);}
+        .footer {background: #222; color: white; padding: 20px 0; margin-top: 50px;}
+        @media (max-width: 768px) {.hero {height: 50vh;}}
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light">
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="#"><i class="fas fa-shopping-cart"></i> Mon E-Shop</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <a class="navbar-brand fw-bold" href="/"><i class="fas fa-shopping-cart"></i> Mon E-Shop</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('home')">Accueil</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('catalog')">Catalogue</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('cart')">Panier</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('account')">Mon Compte</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/conversations">Conversations</a></li>
-                    <li class="nav-item" id="adminLink" style="display: none;"><a class="nav-link" href="#" onclick="showPage('admin')">Admin</a></li>
+            <div class="collapse navbar-collapse" id="nav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/electronique">Électronique</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/vetements">Vêtements</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/maison">Maison</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/cuisine">Cuisine</a></li>
                 </ul>
-                <form class="d-flex" id="searchForm">
-                    <input class="form-control me-2" type="search" placeholder="Rechercher..." id="searchInput">
-                    <button class="btn btn-outline-success" type="submit"><i class="fas fa-search"></i></button>
-                </form>
             </div>
         </div>
     </nav>
 
-    <!-- Page Accueil -->
-    <div id="home" class="page">
-        <div class="hero">
-            <div class="text-center">
-                <h1>Bienvenue sur Mon E-Shop</h1>
-                <p>Découvrez nos produits et profitez de la livraison rapide !</p>
-                <button class="btn btn-primary btn-lg" onclick="showPage('catalog')">Voir le Catalogue</button>
-            </div>
-        </div>
-        <div class="container my-5">
-            <h2>Catégories Principales</h2>
-            <div class="row">
-                <div class="col-md-3"><a href="/electronique" style="text-decoration: none;"><div class="card p-3 text-center"><i class="fas fa-laptop fa-3x"></i><h5>Électronique</h5></div></a></div>
-                <div class="col-md-3"><a href="/vetements" style="text-decoration: none;"><div class="card p-3 text-center"><i class="fas fa-tshirt fa-3x"></i><h5>Vêtements</h5></div></a></div>
-                <div class="col-md-3"><a href="/maison" style="text-decoration: none;"><div class="card p-3 text-center"><i class="fas fa-home fa-3x"></i><h5>Maison</h5></div></a></div>
-                <div class="col-md-3"><a href="/cuisine" style="text-decoration: none;"><div class="card p-3 text-center"><i class="fas fa-utensils fa-3x"></i><h5>Cuisine</h5></div></a></div>
-            </div>
-            <!-- Bloc Promotions complètement désactivé et vidé -->
-            <div id="promotions" style="display:none;"></div>
+    <div class="hero text-center">
+        <div>
+            <h1 class="display-3 fw-bold">Bienvenue sur Mon E-Shop</h1>
+            <p class="lead">Livraison rapide partout en RDC</p>
         </div>
     </div>
 
-    <!-- Catalogue -->
-    <div id="catalog" class="page hidden">
-        <div class="container my-5">
-            <h2>Catalogue de Produits</h2>
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <select class="form-select" id="categoryFilter">
-                        <option value="">Toutes les catégories</option>
-                        <option value="Électronique">Électronique</option>
-                        <option value="Vêtements">Vêtements</option>
-                        <option value="Maison">Maison</option>
-                        <option value="Cuisine">Cuisine</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <select class="form-select" id="sort">
-                        <option value="name">Trier par nom</option>
-                        <option value="price">Trier par prix</option>
-                        <option value="popularity">Trier par popularité</option>
-                    </select>
-                </div>
+    <div class="container my-5">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <a href="/electronique" class="text-decoration-none text-dark">
+                    <div class="card-cat"><i class="fas fa-laptop fa-4x mb-3 text-primary"></i><h4>Électronique</h4></div>
+                </a>
             </div>
-            <div class="row" id="products"></div>
-        </div>
-    </div>
-
-    <!-- Fiche Produit (Modal) -->
-    <div class="modal fade" id="productModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="productTitle"></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <img id="productImage" class="img-fluid mb-3" src="">
-                    <p id="productDescription"></p>
-                    <p><strong>Prix: </strong><span id="productPrice"></span> €</p>
-                    <p><strong>Frais de livraison: </strong><span id="productShipping"></span> €</p>
-                    <p><strong>Quantité disponible: </strong><span id="productStock"></span></p>
-                    <p><strong>Vendeur: </strong><a id="sellerLink" href="#"></a></p>
-                    <button class="btn btn-primary" onclick="addToCart(currentProduct)">Ajouter au Panier</button>
-                    <div class="mt-3">
-                        <h6>Avis Clients</h6>
-                        <p>⭐⭐⭐⭐☆ - Excellent produit !</p>
-                    </div>
-                </div>
+            <div class="col-md-3">
+                <a href="/vetements" class="text-decoration-none text-dark">
+                    <div class="card-cat"><i class="fas fa-tshirt fa-4x mb-3 text-success"></i><h4>Vêtements</h4></div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="/maison" class="text-decoration-none text-dark">
+                    <div class="card-cat"><i class="fas fa-home fa-4x mb-3 text-warning"></i><h4>Maison & Déco</h4></div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="/cuisine" class="text-decoration-none text-dark">
+                    <div class="card-cat"><i class="fas fa-utensils fa-4x mb-3 text-danger"></i><h4>Cuisine</h4></div>
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Modal Ajouter/Modifier Produit -->
-    <div class="modal fade" id="publishModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="publishTitle">Ajouter Produit</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="publishForm">
-                        <input type="text" class="form-control mb-3" id="title" placeholder="Nom du produit" required>
-                        <input type="number" class="form-control mb-3" id="price" placeholder="Prix" required>
-                        <input type="number" class="form-control mb-3" id="shipping_price" placeholder="Frais de livraison" required>
-                        <select class="form-select mb-3" id="category">
-                            <option value="Électronique">Électronique</option>
-                            <option value="Vêtements">Vêtements</option>
-                            <option value="Maison">Maison</option>
-                            <option value="Cuisine">Cuisine</option>
-                        </select>
-                        <input type="number" class="form-control mb-3" id="stock" placeholder="Stock" required>
-                        <textarea class="form-control mb-3" id="desc" placeholder="Description" required></textarea>
-                        <input type="file" class="form-control mb-3" id="image" accept="image/*">
-                        <button type="submit" class="btn btn-primary">Publier</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Panier -->
-    <div id="cart" class="page hidden">
-        <div class="container my-5">
-            <h2>Panier d'Achat</h2>
-            <div id="cartItems"></div>
-            <h3>Total: <span id="total">0</span> €</h3>
-            <button class="btn btn-primary" onclick="showPage('checkout')">Passer la Commande</button>
-        </div>
-    </div>
-
-    <!-- Checkout -->
-    <div id="checkout" class="page hidden">
-        <div class="container my-5">
-            <h2>Paiement</h2>
-            <form id="checkoutForm">
-                <div class="row">
-                    <div class="col-md-6">
-                        <input type="text" class="form-control mb-3" id="nom" placeholder="Nom" required>
-                        <input type="text" class="form-control mb-3" id="prenom" placeholder="Prénom" required>
-                        <input type="text" class="form-control mb-3" id="adresse" placeholder="Adresse" required>
-                        <input type="tel" class="form-control mb-3" id="telephone" placeholder="Téléphone" required>
-                    </div>
-                    <div class="col-md-6">
-                        <select class="form-select mb-3" id="payment">
-                            <option>Mobile Money</option>
-                            <option>Carte</option>
-                            <option>Paiement à la livraison</option>
-                        </select>
-                        <p>Frais de livraison: 5€ - Délai: 2-3 jours</p>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary">Confirmer la Commande</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Compte Utilisateur -->
-    <div id="account" class="page hidden">
-        <div class="container my-5">
-            <h2>Mon Compte</h2>
-            <div id="loginForm">
-                <h3>Login</h3>
-                <form id="login">
-                    <input type="text" class="form-control mb-3" id="username" placeholder="Username" required>
-                    <input type="password" class="form-control mb-3" id="password" placeholder="Password" required>
-                    <button type="submit" class="btn btn-primary">Login</button>
-                </form>
-            </div>
-            <div id="registerForm">
-                <h3>Register</h3>
-                <form id="register">
-                    <input type="text" class="form-control mb-3" id="reg_username" placeholder="Username" required>
-                    <input type="password" class="form-control mb-3" id="reg_password" placeholder="Password" required>
-                    <button type="submit" class="btn btn-primary">Register</button>
-                </form>
-            </div>
-            <div id="userInfo" class="hidden">
-                <p>Connecté en tant que <span id="currentUser"></span></p>
-                <button class="btn btn-danger" onclick="logout()">Déconnexion</button>
-                <h3>Historique des commandes</h3>
-                <div id="orders"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Admin -->
-    <div id="admin" class="page hidden">
-        <div class="container my-5">
-            <h2>Panneau d'Administration (Mes Produits)</h2>
-            <button class="btn btn-primary mb-3" onclick="showPublishForm('add')">Ajouter Produit</button>
-            <div id="adminProducts"></div>
-        </div>
-    </div>
-
-    <!-- Footer -->
     <footer class="footer text-center">
         <p>© 2025 Mon E-Shop. Tous droits réservés.</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        let products = [];
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
-        let currentProduct = null;
-        let editMode = false;
-
-        // Fonctions
-        function showPage(page) {
-            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-            document.getElementById(page).classList.remove('hidden');
-            if (page === 'catalog') loadProducts();
-            if (page === 'cart') loadCart();
-            if (page === 'account') loadAccount();
-            if (page === 'admin') loadAdmin();
-            if (page === 'home') loadPromotions(); // reste appelé mais ne fait rien
-        }
-
-        function updateAuth() {
-            const username = localStorage.getItem('username');
-            if (username) {
-                document.getElementById('loginForm').classList.add('hidden');
-                document.getElementById('registerForm').classList.add('hidden');
-                document.getElementById('userInfo').classList.remove('hidden');
-                document.getElementById('currentUser').textContent = username;
-                document.getElementById('adminLink').style.display = 'block';
-            } else {
-                document.getElementById('loginForm').classList.remove('hidden');
-                document.getElementById('registerForm').classList.remove('hidden');
-                document.getElementById('userInfo').classList.add('hidden');
-                document.getElementById('adminLink').style.display = 'none';
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem('username');
-            localStorage.removeItem('password');
-            updateAuth();
-            showPage('home');
-        }
-
-        function normalizeString(str) {
-            return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        }
-
-        function loadProducts(filter = '', sort = 'name', search = '') {
-            fetch('/api/products')
-                .then(res => res.json())
-                .then(data => {
-                    products = data;
-                    let filtered = products;
-                    if (filter) filtered = filtered.filter(p => normalizeString(p.category) === normalizeString(filter));
-                    if (search) filtered = filtered.filter(p => p.title.toLowerCase().includes(search.toLowerCase()));
-                    filtered.sort((a, b) => {
-                        if (sort === 'price') return a.price - b.price;
-                        if (sort === 'popularity') return b.stock - a.stock;
-                        return a.title.localeCompare(b.title);
-                    });
-                    document.getElementById('products').innerHTML = filtered.map(p => `
-                        <div class="col-md-3 mb-4">
-                            <div class="card">
-                                <img src="${p.image_base64}" class="card-img-top product-img" alt="${p.title}">
-                                <div class="card-body">
-                                    <h5>${p.title}</h5>
-                                    <p>${p.price} €</p>
-                                    <p>Vendeur: ${p.username}</p>
-                                    <button class="btn btn-primary" onclick="viewProduct('${p.id}')">Voir</button>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                }).catch(() => alert('Erreur de chargement des produits'));
-        }
-
-        function viewProduct(id) {
-            currentProduct = products.find(p => p.id === id);
-            document.getElementById('productTitle').textContent = currentProduct.title;
-            document.getElementById('productImage').src = currentProduct.image_base64;
-            document.getElementById('productDescription').textContent = currentProduct.desc;
-            document.getElementById('productPrice').textContent = currentProduct.price;
-            document.getElementById('productShipping').textContent = currentProduct.shipping_price;
-            document.getElementById('productStock').textContent = currentProduct.stock;
-            document.getElementById('sellerLink').textContent = currentProduct.username;
-            document.getElementById('sellerLink').href = `/chat?with=${currentProduct.username}`;
-            new bootstrap.Modal(document.getElementById('productModal')).show();
-        }
-
-        function addToCart(product) {
-            cart.push(product);
-            localStorage.setItem('cart', JSON.stringify(cart));
-            alert('Produit ajouté au panier !');
-        }
-
-        function loadCart() {
-            document.getElementById('cartItems').innerHTML = cart.map((p, i) => `
-                <div class="card mb-3">
-                    <div class="card-body d-flex justify-content-between">
-                        <div>
-                            <h5>${p.title}</h5>
-                            <p>${p.price} € (Livraison: ${p.shipping_price} €)</p>
-                        </div>
-                        <button class="btn btn-danger" onclick="removeFromCart(${i})">Supprimer</button>
-                    </div>
-                </div>
-            `).join('');
-            document.getElementById('total').textContent = cart.reduce((sum, p) => sum + parseFloat(p.price), 0);
-        }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            localStorage.setItem('cart', JSON.stringify(cart));
-            loadCart();
-        }
-
-        function loadAdmin() {
-            const username = localStorage.getItem('username');
-            const password = localStorage.getItem('password');
-            if (!username) return alert('Connexion requise');
-            fetch(`/api/my_products?username=${username}&password=${password}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.error) return alert(data.error);
-                    document.getElementById('adminProducts').innerHTML = data.map(p => `
-                        <div class="card mb-3">
-                            <div class="card-body d-flex justify-content-between">
-                                <div>
-                                    <h5>${p.title}</h5>
-                                    <p>${p.price} €</p>
-                                </div>
-                                <button class="btn btn-warning" onclick="editProduct('${p.id}')">Modifier</button>
-                                <button class="btn btn-danger" onclick="deleteProduct('${p.id}')">Supprimer</button>
-                            </div>
-                        </div>
-                    `).join('');
-                }).catch(() => alert('Erreur de chargement'));
-        }
-
-        function showPublishForm(mode = 'add', id = null) {
-            editMode = mode === 'edit';
-            document.getElementById('publishTitle').textContent = editMode ? 'Modifier Produit' : 'Ajouter Produit';
-            if (editMode) {
-                currentProduct = products.find(p => p.id === id);
-                document.getElementById('title').value = currentProduct.title;
-                document.getElementById('price').value = currentProduct.price;
-                document.getElementById('shipping_price').value = currentProduct.shipping_price;
-                document.getElementById('category').value = currentProduct.category;
-                document.getElementById('stock').value = currentProduct.stock;
-                document.getElementById('desc').value = currentProduct.desc;
-            } else {
-                document.getElementById('publishForm').reset();
-            }
-            new bootstrap.Modal(document.getElementById('publishModal')).show();
-        }
-
-        function deleteProduct(id) {
-            if (!confirm('Confirmer la suppression ?')) return;
-            const username = localStorage.getItem('username');
-            const password = localStorage.getItem('password');
-            fetch('/delete_product', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username, password, product_id: id})
-            }).then(res => res.json())
-              .then(data => {
-                if (data.success) {
-                    alert('Produit supprimé');
-                    loadAdmin();
-                } else {
-                    alert(data.error);
-                }
-              });
-        }
-
-        function editProduct(id) {
-            showPublishForm('edit', id);
-        }
-
-        function loadAccount() {
-            updateAuth();
-            const username = localStorage.getItem('username');
-            const password = localStorage.getItem('password');
-            if (username) {
-                fetch(`/api/my_orders?username=${username}&password=${password}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.error) return alert(data.error);
-                        document.getElementById('orders').innerHTML = data.map(o => `
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <h5>Commande du ${new Date(o.time).toLocaleString('fr-FR')}</h5>
-                                    <p>Total: ${o.total} €</p>
-                                    <ul>
-                                        ${o.items.map(i => `<li>${i.title} - ${i.price} € (Vendeur: ${i.username})</li>`).join('')}
-                                    </ul>
-                                </div>
-                            </div>
-                        `).join('');
-                    }).catch(() => alert('Erreur de chargement des commandes'));
-            }
-        }
-
-        // === PROMOTIONS DÉSACTIVÉES COMPLÈTEMENT ===
-        function loadPromotions() {
-            // On ne charge plus rien sur la page d'accueil
-            document.getElementById('promotions').innerHTML = '';
-        }
-
-        // Événements
-        document.getElementById('categoryFilter').addEventListener('change', () => {
-            const filter = document.getElementById('categoryFilter').value;
-            const sort = document.getElementById('sort').value;
-            const search = document.getElementById('searchInput').value;
-            loadProducts(filter, sort, search);
-        });
-
-        document.getElementById('sort').addEventListener('change', () => {
-            const filter = document.getElementById('categoryFilter').value;
-            const sort = document.getElementById('sort').value;
-            const search = document.getElementById('searchInput').value;
-            loadProducts(filter, sort, search);
-        });
-
-        document.getElementById('searchForm').addEventListener('submit', e => {
-            e.preventDefault();
-            const filter = document.getElementById('categoryFilter').value;
-            const sort = document.getElementById('sort').value;
-            const search = document.getElementById('searchInput').value;
-            loadProducts(filter, sort, search);
-        });
-
-        document.getElementById('login').addEventListener('submit', e => {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            fetch('/login', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username, password})
-            }).then(res => res.json())
-              .then(data => {
-                if (data.success) {
-                    localStorage.setItem('username', username);
-                    localStorage.setItem('password', password);
-                    updateAuth();
-                    loadAccount();
-                } else {
-                    alert(data.error);
-                }
-              });
-        });
-
-        document.getElementById('register').addEventListener('submit', e => {
-            e.preventDefault();
-            const username = document.getElementById('reg_username').value;
-            const password = document.getElementById('reg_password').value;
-            fetch('/register', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username, password})
-            }).then(res => res.json())
-              .then(data => {
-                if (data.success) {
-                    alert('Inscrit ! Connectez-vous.');
-                } else {
-                    alert(data.error);
-                }
-              });
-        });
-
-        document.getElementById('publishForm').addEventListener('submit', e => {
-            e.preventDefault();
-            const username = localStorage.getItem('username');
-            const password = localStorage.getItem('password');
-            if (!username) return alert('Connexion requise');
-            if (editMode) {
-                const updates = {
-                    title: document.getElementById('title').value,
-                    price: document.getElementById('price').value,
-                    shipping_price: document.getElementById('shipping_price').value,
-                    category: document.getElementById('category').value,
-                    stock: document.getElementById('stock').value,
-                    desc: document.getElementById('desc').value
-                };
-                fetch('/edit_product', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({username, password, product_id: currentProduct.id, updates})
-                }).then(res => res.json())
-                  .then(data => {
-                    if (data.success) {
-                        alert('Produit modifié !');
-                        bootstrap.Modal.getInstance(document.getElementById('publishModal')).hide();
-                        loadAdmin();
-                    } else {
-                        alert(data.error);
-                    }
-                });
-            } else {
-                const formData = new FormData();
-                formData.append('username', username);
-                formData.append('password', password);
-                formData.append('title', document.getElementById('title').value);
-                formData.append('price', document.getElementById('price').value);
-                formData.append('shipping_price', document.getElementById('shipping_price').value);
-                formData.append('category', document.getElementById('category').value);
-                formData.append('stock', document.getElementById('stock').value);
-                formData.append('desc', document.getElementById('desc').value);
-                formData.append('image', document.getElementById('image').files[0]);
-                fetch('/publish', {method: 'POST', body: formData})
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Produit ajouté !');
-                            bootstrap.Modal.getInstance(document.getElementById('publishModal')).hide();
-                            loadAdmin();
-                        } else {
-                            alert(data.error);
-                        }
-                    });
-            }
-        });
-
-        document.getElementById('checkoutForm').addEventListener('submit', e => {
-            e.preventDefault();
-            const username = localStorage.getItem('username') || 'guest';
-            const nom = document.getElementById('nom').value;
-            const prenom = document.getElementById('prenom').value;
-            const adresse = document.getElementById('adresse').value;
-            const telephone = document.getElementById('telephone').value;
-            const payment = document.getElementById('payment').value;
-            const total = cart.reduce((sum, p) => sum + parseFloat(p.price), 0) + 5;
-            const order = {username, nom, prenom, adresse, telephone, payment, items: cart, total};
-            fetch('/submit_order', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(order)
-            }).then(res => res.json())
-              .then(data => {
-                if (data.success) {
-                    alert('Commande confirmée !');
-                    cart = [];
-                    localStorage.setItem('cart', JSON.stringify(cart));
-                    showPage('home');
-                } else {
-                    alert(data.error);
-                }
-              });
-        });
-
-        // Initialisation
-        updateAuth();
-        showPage('home');
-    </script>
 </body>
 </html>
