@@ -45,8 +45,8 @@
                     <p><strong>Livraison :</strong> <span id="productShipping"></span> €</p>
                     <p><strong>Stock :</strong> <span id="productStock"></span></p>
                     <p><strong>Vendeur :</strong> <a id="sellerLink" href="#" target="_blank" class="text-decoration-none"></a></p>
-                    <button class="btn btn-success btn-lg w-100" onclick="contactSeller(currentProduct)">
-                        <i class="fab fa-whatsapp"></i> Contacter sur Chronos
+                    <button class="btn btn-success btn-lg w-100" onclick="contactWhatsApp(currentProduct)">
+                        <i class="fab fa-whatsapp"></i> Contacter sur WhatsApp
                     </button>
                 </div>
             </div>
@@ -112,8 +112,9 @@
             new bootstrap.Modal(document.getElementById('productModal')).show();
         }
 
-        function contactSeller(p) {
-            window.location.href = `/chat/${p.username}?phone=${p.phone}`;
+        function contactWhatsApp(p) {
+            const msg = encodeURIComponent(`Bonjour ! Intéressé par "${p.title}" à ${p.price}€`);
+            window.open(`https://wa.me/${p.phone}?text=${msg}`, '_blank');
         }
 
         loadSubcategories();
