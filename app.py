@@ -1,15 +1,20 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, send_from_directory
 from flask_socketio import SocketIO
 import datetime
 from base64 import b64encode
 import json
 import os
 import uuid
+import shutil
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 DATA_FILE = 'data.json'
+TEMPLATES_DIR = 'templates'  # Dossier où seront générés les fichiers HTML
+
+# Créer le dossier templates s'il n'existe pas
+os.makedirs(TEMPLATES_DIR, exist_ok=True)
 
 # Chargement des données
 if os.path.exists(DATA_FILE):
@@ -48,7 +53,45 @@ def save_data():
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-# === Pages HTML ===
+# === Création des pages HTML pour chaque sous-catégorie ===
+def create_subcategory_page(main_cat, sub_cat):
+    safe_subcat = "".join(c for c in sub_cat if c.isalnum() or c in " -_").replace(" ", "_").lower()
+    filename = f"{safe_subcat}.html"
+    filepath = os.path.join(TEMPLATES_DIR, filename)
+
+    if os.path.exists(filepath):
+        return  # Déjà existe
+
+    # Copier le modèle électronique.html et personnaliser
+    template_path = "electronique.html"
+    if not os.path.exists(template_path):
+        print("Modèle manquant : electronique.html")
+        return
+
+    with open(template_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    # Remplacer les titres et URLs dynamiquement
+    content = content.replace("Électronique", sub_cat)
+    content = content.replace("/electronique", f"/{safe_subcat}")
+    content = content.replace("Électronique", main_cat, 1)  # Première occurrence = catégorie principale
+
+    # Modifier le fetch pour la bonne catégorie
+    content = content.replace(
+        "fetch('/api/subcategories?main=Électronique')",
+        f"fetch('/api/subcategories?main={main_cat}')"
+    )
+    content = content.replace(
+        "p.category === 'Électronique'",
+        f"p.category === '{main_cat}'"
+    )
+
+    with open(filepath, 'w', encoding='utf-8') as f:
+        f.write(content)
+
+    print(f"Page créée : {filename}")
+
+# === Pages statiques principales ===
 @app.route('/')
 def index():
     return send_file('style.html')
@@ -68,6 +111,14 @@ def maison():
 @app.route('/cuisine')
 def cuisine():
     return send_file('cuisine.html')
+
+# === Route dynamique pour les sous-catégories créées ===
+@app.route('/<subcat_page>')
+def dynamic_subcategory_page(subcat_page):
+    filepath = os.path.join(TEMPLATES_DIR, f"{subcat_page}.html")
+    if os.path.exists(filepath):
+        return send_file(filepath)
+    return "Page non trouvée", 404
 
 # === API ===
 @app.route('/api/products')
@@ -97,15 +148,24 @@ def add_subcategory():
         if sub_cat in subcategories[main_cat]:
             return jsonify({'error': 'Cette sous-catégorie existe déjà'}), 400
 
-        # Création auto de l'utilisateur s'il n'existe pas
+        # Vérification vendeur
         if username not in users:
             users[username] = {'phone': phone}
-        if users[username]['phone'] != phone:
+        if users[username].get('phone') != phone:
             return jsonify({'error': 'Numéro WhatsApp incorrect'}), 401
 
+        # Ajouter la sous-catégorie
         subcategories[main_cat].append(sub_cat)
         save_data()
-        return jsonify({'success': True, 'message': f'Sous-catégorie "{sub_cat}" ajoutée !'})
+
+        # Créer la page HTML réelle automatiquement
+        create_subcategory_page(main_cat, sub_cat)
+
+        return jsonify({
+            'success': True,
+            'message': f'Sous-catégorie "{sub_cat}" ajoutée !',
+            'url': f'/{ "".join(c for c in sub_cat if c.isalnum() or c in " -_").replace(" ", "_").lower() }'
+        })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -126,13 +186,11 @@ def publish():
         if not all([username, phone, title, price, shipping_price, category, stock, desc, image]):
             return jsonify({'error': 'Tous les champs sont obligatoires'}), 400
 
-        # Auto-création utilisateur
         if username not in users:
             users[username] = {'phone': phone}
-        if users[username]['phone'] != phone:
+        if users[username].get('phone') != phone:
             return jsonify({'error': 'Numéro WhatsApp incorrect'}), 401
 
-        # Traitement image
         image_data = image.read()
         b64 = b64encode(image_data).decode()
         image_base64 = f"data:{image.mimetype};base64,{b64}"

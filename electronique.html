@@ -21,7 +21,7 @@
     <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="/"><i class="fas fa-shopping-cart"></i> Mon E-Shop</a>
-            <a href="/" class="btn btn-outline-light">← Retour</a>
+            <a href="/" class="btn btn-outline-dark">Retour</a>
         </div>
     </nav>
 
@@ -46,7 +46,7 @@
                     <p><strong>Stock :</strong> <span id="productStock"></span></p>
                     <p><strong>Vendeur :</strong> <a id="sellerLink" href="#" target="_blank" class="text-decoration-none"></a></p>
                     <button class="btn btn-success btn-lg w-100" onclick="contactWhatsApp(currentProduct)">
-                        <i class="fab fa-whatsapp"></i> Contacter sur WhatsApp
+                        Contacter sur WhatsApp
                     </button>
                 </div>
             </div>
@@ -69,6 +69,7 @@
             const container = document.getElementById('subcategories');
             container.innerHTML = `<button class="subcat-btn" onclick="loadAll()">Toutes</button>`;
             subs.forEach(s => {
+                const safe = s.toLowerCase().replace(/[^a-z0-9]/g, '_');
                 container.innerHTML += `<button class="subcat-btn" onclick="filterSubcat('${s}')">${s}</button>`;
             });
         }
@@ -91,7 +92,7 @@
                             ${p.subcategory ? `<span class="badge bg-secondary mb-2">${p.subcategory}</span><br>` : ''}
                             <p class="text-success fs-5 fw-bold">${p.price}€ + ${p.shipping_price}€ livraison</p>
                             <button class="btn btn-success" onclick="viewProduct('${p.id}')">
-                                <i class="fab fa-whatsapp"></i> Contacter
+                                Contacter
                             </button>
                         </div>
                     </div>
