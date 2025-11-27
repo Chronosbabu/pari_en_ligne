@@ -27,7 +27,11 @@
 
     <div class="container pt-5 mt-5">
         <h2 class="text-center text-white mb-4" style="text-shadow: 2px 2px 8px rgba(0,0,0,0.7);">Électronique</h2>
-        <div class="d-flex flex-wrap justify-content-center mb-5" id="subcategories"></div>
+        <div class="d-flex flex-wrap justify-content-center mb-5" id="subcategories">
+            <button class="subcat-btn" onclick="window.location.href='/ordinateur'">Ordinateurs</button>
+            <button class="subcat-btn" onclick="window.location.href='/telephone'">Téléphones</button>
+            <button class="subcat-btn" onclick="window.location.href='/montre_et_autres'">Montres et Accessoires</button>
+        </div>
         <div class="row" id="products"></div>
     </div>
 
@@ -63,26 +67,10 @@
         let currentProduct = null;
         let currentSubcat = null;
 
-        async function loadSubcategories() {
-            const res = await fetch('/api/subcategories?main=Électronique');
-            const subs = await res.json();
-            const container = document.getElementById('subcategories');
-            container.innerHTML = `<button class="subcat-btn" onclick="loadAll()">Toutes</button>`;
-            subs.forEach(s => {
-                const safe = s.toLowerCase().replace(/[^a-z0-9]/g, '_');
-                container.innerHTML += `<button class="subcat-btn" onclick="filterSubcat('${s}')">${s}</button>`;
-            });
-        }
-
-        function loadAll() { currentSubcat = null; loadProducts(); }
-        function filterSubcat(sub) { currentSubcat = sub; loadProducts(); }
-
         async function loadProducts() {
             const res = await fetch('/api/products');
             products = await res.json();
-            let filtered = products.filter(p => p.category === 'Électronique');
-            if (currentSubcat) filtered = filtered.filter(p => p.subcategory === currentSubcat);
-
+            let filtered = products.filter(p => p.category === 'Électronique' && !p.subcategory);
             document.getElementById('products').innerHTML = filtered.map(p => `
                 <div class="col-md-4 mb-4">
                     <div class="card-product">
@@ -118,7 +106,6 @@
             window.open(`https://wa.me/${p.phone}?text=${msg}`, '_blank');
         }
 
-        loadSubcategories();
         loadProducts();
     </script>
 </body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vêtements - Mon E-Shop</title>
+    <title>Ordinateurs - Mon E-Shop</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -21,17 +21,12 @@
     <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="/"><i class="fas fa-shopping-cart"></i> Mon E-Shop</a>
-            <a href="/" class="btn btn-outline-light">← Retour</a>
+            <a href="/" class="btn btn-outline-dark">Retour</a>
         </div>
     </nav>
 
     <div class="container pt-5 mt-5">
-        <h2 class="text-center text-white mb-4" style="text-shadow: 2px 2px 8px rgba(0,0,0,0.7);">Vêtements</h2>
-        <div class="d-flex flex-wrap justify-content-center mb-5" id="subcategories">
-            <button class="subcat-btn" onclick="window.location.href='/homme'">Hommes</button>
-            <button class="subcat-btn" onclick="window.location.href='/femme'">Femmes</button>
-            <button class="subcat-btn" onclick="window.location.href='/enfant'">Enfants</button>
-        </div>
+        <h2 class="text-center text-white mb-4" style="text-shadow: 2px 2px 8px rgba(0,0,0,0.7);">Ordinateurs</h2>
         <div class="row" id="products"></div>
     </div>
 
@@ -50,7 +45,7 @@
                     <p><strong>Stock :</strong> <span id="productStock"></span></p>
                     <p><strong>Vendeur :</strong> <a id="sellerLink" href="#" target="_blank" class="text-decoration-none"></a></p>
                     <button class="btn btn-success btn-lg w-100" onclick="contactWhatsApp(currentProduct)">
-                        <i class="fab fa-whatsapp"></i> Contacter sur WhatsApp
+                        Contacter sur WhatsApp
                     </button>
                 </div>
             </div>
@@ -65,12 +60,14 @@
     <script>
         let products = [];
         let currentProduct = null;
-        let currentSubcat = null;
+        let currentSubcat = "Ordinateurs";
 
         async function loadProducts() {
             const res = await fetch('/api/products');
             products = await res.json();
-            let filtered = products.filter(p => p.category === 'Vêtements' && !p.subcategory);
+            let filtered = products.filter(p => p.category === 'Électronique');
+            if (currentSubcat) filtered = filtered.filter(p => p.subcategory === currentSubcat);
+
             document.getElementById('products').innerHTML = filtered.map(p => `
                 <div class="col-md-4 mb-4">
                     <div class="card-product">
@@ -80,7 +77,7 @@
                             ${p.subcategory ? `<span class="badge bg-secondary mb-2">${p.subcategory}</span><br>` : ''}
                             <p class="text-success fs-5 fw-bold">${p.price}€ + ${p.shipping_price}€ livraison</p>
                             <button class="btn btn-success" onclick="viewProduct('${p.id}')">
-                                <i class="fab fa-whatsapp"></i> Contacter
+                                Contacter
                             </button>
                         </div>
                     </div>
