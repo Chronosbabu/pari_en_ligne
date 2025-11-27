@@ -6,12 +6,17 @@ import json
 import os
 import uuid
 import shutil
+
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
-DATA_FILE = 'data.json'
-TEMPLATES_DIR = 'templates'  # Dossier où seront générés les fichiers HTML
+
+# Chemins persistants (configure un Disk sur Render.com monté à /data)
+DATA_FILE = '/data/data.json'
+TEMPLATES_DIR = '/data/templates'
+
 # Créer le dossier templates s'il n'existe pas
 os.makedirs(TEMPLATES_DIR, exist_ok=True)
+
 # Chargement des données
 if os.path.exists(DATA_FILE):
     with open(DATA_FILE, 'r', encoding='utf-8') as f:
@@ -37,6 +42,7 @@ else:
         "Maison": [],
         "Cuisine": []
     }
+
 def save_data():
     data = {
         'users': users,
@@ -47,6 +53,7 @@ def save_data():
     }
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
 # Dictionnaire pour safe custom afin de matcher tes noms de fichiers
 custom_safe = {
     "Ordinateurs": "ordinateur",
@@ -58,6 +65,7 @@ custom_safe = {
     "Nourritures préparées": "manger",
     "Nourritures à préparer": "preparer",
 }
+
 # === Création des pages HTML pour chaque sous-catégorie ===
 def create_subcategory_page(main_cat, sub_cat):
     # Choisir le template en fonction de la catégorie principale
@@ -98,6 +106,7 @@ def create_subcategory_page(main_cat, sub_cat):
     with open(filepath, 'w', encoding='utf-8') as f:
         f.write(content)
     print(f"Page créée : {filename}")
+
 # Ajout des sous-catégories prédéfinies au démarrage
 predefined_subcats = {
     "Électronique": ["Ordinateurs", "Téléphones", "Montres et Accessoires"],
@@ -111,22 +120,28 @@ for main, subs in predefined_subcats.items():
             subcategories[main].append(sub)
         create_subcategory_page(main, sub)
 save_data()
+
 # === Pages statiques principales ===
 @app.route('/')
 def index():
     return send_file('style.html')
+
 @app.route('/electronique')
 def electronique():
     return send_file('electronique.html')
+
 @app.route('/vetements')
 def vetements():
     return send_file('vetements.html')
+
 @app.route('/maison')
 def maison():
     return send_file('maison.html')
+
 @app.route('/cuisine')
 def cuisine():
     return send_file('cuisine.html')
+
 # === Route dynamique pour les sous-catégories créées ===
 @app.route('/<subcat_page>')
 def dynamic_subcategory_page(subcat_page):
@@ -134,16 +149,19 @@ def dynamic_subcategory_page(subcat_page):
     if os.path.exists(filepath):
         return send_file(filepath)
     return "Page non trouvée", 404
+
 # === API ===
 @app.route('/api/products')
 def get_products():
     return jsonify(products)
+
 @app.route('/api/subcategories')
 def get_subcategories():
     main = request.args.get('main')
     if main in subcategories:
         return jsonify(subcategories[main])
     return jsonify([])
+
 @app.route('/api/add_subcategory', methods=['POST'])
 def add_subcategory():
     try:
@@ -176,6 +194,7 @@ def add_subcategory():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 @app.route('/publish', methods=['POST'])
 def publish():
     try:
@@ -217,5 +236,6 @@ def publish():
         return jsonify({'success': True, 'message': 'Produit publié avec succès !'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
