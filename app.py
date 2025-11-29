@@ -194,7 +194,7 @@ def publish():
         if username not in users:
             users[username] = {'phone': phone}
         if users[username].get('phone') != phone:
-            return jupytext({'error': 'Numéro WhatsApp incorrect'}), 401
+            return jsonify({'error': 'Numéro WhatsApp incorrect'}), 401
         image_data = image.read()
         b64 = b64encode(image_data).decode()
         image_base64 = f"data:{image.mimetype};base64,{b64}"
