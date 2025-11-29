@@ -95,7 +95,6 @@ def create_subcategory_page(main_cat, sub_cat):
     content = content.replace('<div class="d-flex flex-wrap justify-content-center mb-5" id="subcategories"></div>', '')
     content = content.replace('function loadAll() { currentSubcat = null; loadProducts(); }', '')
     content = content.replace('function filterSubcat(sub) { currentSubcat = sub; loadProducts(); }', '')
-    content = content.replace('loadAll();', 'loadProducts();')
     with open(filepath, 'w', encoding='utf-8') as f:
         f.write(content)
     print(f"Page créée : {filename}")
@@ -195,7 +194,7 @@ def publish():
         if username not in users:
             users[username] = {'phone': phone}
         if users[username].get('phone') != phone:
-            return jsonify({'error': 'Numéro WhatsApp incorrect'}), 401
+            return jupytext({'error': 'Numéro WhatsApp incorrect'}), 401
         image_data = image.read()
         b64 = b64encode(image_data).decode()
         image_base64 = f"data:{image.mimetype};base64,{b64}"
@@ -218,5 +217,5 @@ def publish():
         return jsonify({'success': True, 'message': 'Produit publié avec succès !'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-if __name__ == "__main__":
+if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))

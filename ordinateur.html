@@ -24,12 +24,10 @@
             <a href="/" class="btn btn-outline-dark">Retour</a>
         </div>
     </nav>
-
     <div class="container pt-5 mt-5">
         <h2 class="text-center text-white mb-4" style="text-shadow: 2px 2px 8px rgba(0,0,0,0.7);">Ordinateurs</h2>
         <div class="row" id="products"></div>
     </div>
-
     <div class="modal fade" id="productModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content rounded-4">
@@ -51,23 +49,19 @@
             </div>
         </div>
     </div>
-
     <footer class="footer text-center">
         <p>© 2025 Mon E-Shop</p>
     </footer>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let products = [];
         let currentProduct = null;
         let currentSubcat = "Ordinateurs";
-
         async function loadProducts() {
             const res = await fetch('/api/products');
             products = await res.json();
             let filtered = products.filter(p => p.category === 'Électronique');
             if (currentSubcat) filtered = filtered.filter(p => p.subcategory === currentSubcat);
-
             document.getElementById('products').innerHTML = filtered.map(p => `
                 <div class="col-md-4 mb-4">
                     <div class="card-product">
@@ -84,7 +78,6 @@
                 </div>
             `).join('');
         }
-
         function viewProduct(id) {
             currentProduct = products.find(p => p.id === id);
             document.getElementById('productTitle').textContent = currentProduct.title;
@@ -97,12 +90,10 @@
             document.getElementById('sellerLink').href = `https://wa.me/${currentProduct.phone}`;
             new bootstrap.Modal(document.getElementById('productModal')).show();
         }
-
         function contactWhatsApp(p) {
             const msg = encodeURIComponent(`Bonjour ! Intéressé par "${p.title}" à ${p.price}€`);
             window.open(`https://wa.me/${p.phone}?text=${msg}`, '_blank');
         }
-
         loadProducts();
     </script>
 </body>
