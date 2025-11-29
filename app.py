@@ -9,7 +9,7 @@ import shutil
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 DATA_FILE = 'data.json'
-TEMPLATES_DIR = 'templates'  # Dossier où seront générés les fichiers HTML
+TEMPLATES_DIR = 'templates' # Dossier où seront générés les fichiers HTML
 # Créer le dossier templates s'il n'existe pas
 os.makedirs(TEMPLATES_DIR, exist_ok=True)
 # Chargement des données
@@ -77,24 +77,25 @@ def create_subcategory_page(main_cat, sub_cat):
     with open(template_path, 'r', encoding='utf-8') as f:
         content = f.read()
     # Safe avec custom si disponible
-    safe_subcat = custom_safe.get(sub_cat, "".join(c for c in sub_cat if c.isalnum() or c in " -_").replace(" ", "_").lower())
+    safe_subcat = custom_safe.get(sub_cat, "".join(c for c in sub_cat if c.isalnum() or c in " -*").replace(" ", "*").lower())
     filename = f"{safe_subcat}.html"
     filepath = os.path.join(TEMPLATES_DIR, filename)
     if os.path.exists(filepath):
-        return  # Déjà existe
+        return # Déjà existe
     # Remplacements pour adapter à la sous-catégorie
     content = content.replace(f"{main_cat} - Mon E-Shop", f"{sub_cat} - Mon E-Shop")
-    content = content.replace(f">{main_cat}<", f">{sub_cat}<")  # Pour h2, approx
+    content = content.replace(f">{main_cat}<", f">{sub_cat}<") # Pour h2, approx
     if main_cat == "Cuisine":
         content = content.replace(">Cuisine & Ustensiles<", f">{sub_cat}<")
-    content = content.replace(f"main={main_cat}", f"main={main_cat}")  # Déjà ok
-    content = content.replace(f"p.category === '{main_cat}'", f"p.category === '{main_cat}'")  # Déjà ok
+    content = content.replace(f"main={main_cat}", f"main={main_cat}") # Déjà ok
+    content = content.replace(f"p.category === '{main_cat}'", f"p.category === '{main_cat}'") # Déjà ok
     # Pour page de sous-catégorie : fixer le filtre, supprimer boutons
     content = content.replace('let currentSubcat = null;', f'let currentSubcat = "{sub_cat}";')
     content = content.replace('loadSubcategories();', '')
     content = content.replace('<div class="d-flex flex-wrap justify-content-center mb-5" id="subcategories"></div>', '')
     content = content.replace('function loadAll() { currentSubcat = null; loadProducts(); }', '')
     content = content.replace('function filterSubcat(sub) { currentSubcat = sub; loadProducts(); }', '')
+    content = content.replace('loadAll();', 'loadProducts();')
     with open(filepath, 'w', encoding='utf-8') as f:
         f.write(content)
     print(f"Page créée : {filename}")
@@ -168,7 +169,7 @@ def add_subcategory():
         save_data()
         # Créer la page HTML réelle automatiquement
         create_subcategory_page(main_cat, sub_cat)
-        safe_subcat = custom_safe.get(sub_cat, "".join(c for c in sub_cat if c.isalnum() or c in " -_").replace(" ", "_").lower())
+        safe_subcat = custom_safe.get(sub_cat, "".join(c for c in sub_cat if c.isalnum() or c in " -*").replace(" ", "*").lower())
         return jsonify({
             'success': True,
             'message': f'Sous-catégorie "{sub_cat}" ajoutée !',
@@ -206,7 +207,7 @@ def publish():
             'price': float(price),
             'shipping_price': float(shipping_price),
             'category': category,
-            'subcategory': subcategory or "",  # Correction : chaîne vide au lieu de None
+            'subcategory': subcategory or "",
             'stock': int(stock),
             'desc': desc,
             'image_base64': image_base64,
@@ -217,5 +218,5 @@ def publish():
         return jsonify({'success': True, 'message': 'Produit publié avec succès !'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-if __name__ == '__main__':
+if __name__ == "__main__":
     socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
