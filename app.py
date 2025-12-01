@@ -68,7 +68,7 @@ custom_safe = {
 
 def create_subcategory_page(main_cat, sub_cat):
     template_map = {
-        "Électronique": "electronique.html",
+        "Électronique": "electronique_template.html",  # Renommé pour éviter conflit avec electronique.html
         "Vêtements": "vetements.html",
         "Maison": "maison.html",
         "Cuisine": "cuisine.html"
