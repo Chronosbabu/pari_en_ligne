@@ -1,23 +1,23 @@
-from flask import Flask, request, jsonify, send_file, send_from_directory
+# app.py
+from flask import Flask, request, jsonify, send_file
 from flask_socketio import SocketIO
 import datetime
 from base64 import b64encode
 import json
 import os
 import uuid
-import shutil
 import re
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 DATA_FILE = 'data.json'
-TEMPLATES_DIR = 'templates'  # Dossier où seront générés les fichiers HTML
+TEMPLATES_DIR = 'templates'  # Dossier où seront générés les fichiers HTML des sous-catégories
 
 # Créer le dossier templates s'il n'existe pas
 os.makedirs(TEMPLATES_DIR, exist_ok=True)
 
-# Chargement des données
+# Chargement des données persistantes
 if os.path.exists(DATA_FILE):
     with open(DATA_FILE, 'r', encoding='utf-8') as f:
         data = json.load(f)
@@ -54,7 +54,7 @@ def save_data():
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-# Dictionnaire pour noms de fichiers safe
+# Mapping pour les noms de fichiers "safe"
 custom_safe = {
     "Ordinateurs": "ordinateur",
     "Téléphones": "telephone",
@@ -66,32 +66,30 @@ custom_safe = {
     "Nourritures à préparer": "preparer",
 }
 
-# === Création des pages HTML pour chaque sous-catégorie ===
 def create_subcategory_page(main_cat, sub_cat):
-    if main_cat == "Électronique":
-        template_path = "electronique.html"
-    elif main_cat == "Vêtements":
-        template_path = "vetements.html"
-    elif main_cat == "Maison":
-        template_path = "maison.html"
-    elif main_cat == "Cuisine":
-        template_path = "cuisine.html"
-    else:
-        return
-
-    if not os.path.exists(template_path):
-        print(f"Modèle manquant : {template_path}")
+    template_map = {
+        "Électronique": "electronique.html",
+        "Vêtements": "vetements.html",
+        "Maison": "maison.html",
+        "Cuisine": "cuisine.html"
+    }
+    template_path = template_map.get(main_cat)
+    if not template_path or not os.path.exists(template_path):
+        print(f"Modèle manquant ou catégorie inconnue : {main_cat}")
         return
 
     with open(template_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    safe_subcat = custom_safe.get(sub_cat, "".join(c for c in sub_cat if c.isalnum() or c in " -*").replace(" ", "*").lower())
+    safe_subcat = custom_safe.get(sub_cat,
+                                 "".join(c for c in sub_cat if c.isalnum() or c in " -*")
+                                 .replace(" ", "*").lower())
     filename = f"{safe_subcat}.html"
     filepath = os.path.join(TEMPLATES_DIR, filename)
 
     if os.path.exists(filepath):
-        return  # Déjà existe
+        return  # déjà créé
+        return
 
     # Adaptations du template
     content = content.replace(f"{main_cat} - Mon E-Shop", f"{sub_cat} - Mon E-Shop")
@@ -105,22 +103,18 @@ def create_subcategory_page(main_cat, sub_cat):
     content = content.replace('function loadAll() { currentSubcat = null; loadProducts(); }', '')
     content = content.replace('function filterSubcat(sub) { currentSubcat = sub; loadProducts(); }', '')
 
-    # Filtre correct pour la sous-catégorie
+    # Filtre strict sur catégorie + sous-catégorie
     content = re.sub(
         r'p\.category\s*===\s*[\'"]' + re.escape(main_cat) + r'[\'"]',
         f"p.category === '{main_cat}' && p.subcategory === '{sub_cat}'",
         content
     )
-    content = content.replace(
-        "p.category === '${main_cat}' && (!currentSubcat || p.subcategory === currentSubcat)",
-        f"p.category === '{main_cat}' && p.subcategory === '{sub_cat}'"
-    )
 
     with open(filepath, 'w', encoding='utf-8') as f:
         f.write(content)
-    print(f"Page créée : {filename}")
+    print(f"Page créée → {filename}")
 
-# Ajout des sous-catégories prédéfinies au démarrage
+# Création des sous-catégories prédéfinies au démarrage
 predefined_subcats = {
     "Électronique": ["Ordinateurs", "Téléphones", "Montres et Accessoires"],
     "Vêtements": ["Hommes", "Femmes", "Enfants"],
@@ -136,7 +130,8 @@ for main, subs in predefined_subcats.items():
 
 save_data()
 
-# === Pages statiques principales ===
+# ====================== ROUTES ======================
+
 @app.route('/')
 def index():
     return send_file('style.html')
@@ -157,7 +152,7 @@ def maison():
 def cuisine():
     return send_file('cuisine.html')
 
-# === Route dynamique pour les sous-catégories ===
+# Route dynamique pour toutes les sous-catégories générées
 @app.route('/<subcat_page>')
 def dynamic_subcategory_page(subcat_page):
     filepath = os.path.join(TEMPLATES_DIR, f"{subcat_page}.html")
@@ -165,7 +160,8 @@ def dynamic_subcategory_page(subcat_page):
         return send_file(filepath)
     return "Page non trouvée", 404
 
-# === API ===
+# ====================== API ======================
+
 @app.route('/api/products')
 def get_products():
     return jsonify(products)
@@ -188,7 +184,7 @@ def add_subcategory():
 
         if not main_cat or main_cat not in subcategories:
             return jsonify({'error': 'Catégorie principale invalide'}), 400
-        if not sub_cat:  # CORRIGÉ ICI
+        if not sub_cat:   # <-- LA LIGNE CORRIGÉE
             return jsonify({'error': 'Nom de sous-catégorie requis'}), 400
         if sub_cat in subcategories[main_cat]:
             return jsonify({'error': 'Cette sous-catégorie existe déjà'}), 400
@@ -199,12 +195,14 @@ def add_subcategory():
         if users[username].get('phone') != phone:
             return jsonify({'error': 'Numéro WhatsApp incorrect'}), 401
 
-        # Ajout
         subcategories[main_cat].append(sub_cat)
         save_data()
         create_subcategory_page(main_cat, sub_cat)
 
-        safe_subcat = custom_safe.get(sub_cat, "".join(c for c in sub_cat if c.isalnum() or c in " -*").replace(" ", "*").lower())
+        safe_subcat = custom_safe.get(sub_cat,
+                                     "".join(c for c in sub_cat if c.isalnum() or c in " -*")
+                                     .replace(" ", "*").lower())
+
         return jsonify({
             'success': True,
             'message': f'Sous-catégorie "{sub_cat}" ajoutée !',
@@ -227,7 +225,8 @@ def publish():
         desc = request.form.get('desc')
         image = request.files.get('image')
 
-        if not all([username, phone, title, price, shipping_price, category, stock, desc, image]):
+        required = [username, phone, title, price, shipping_price, category, stock, desc, image]
+        if not all(required):
             return jsonify({'error': 'Tous les champs sont obligatoires'}), 400
 
         if username not in users:
@@ -253,11 +252,16 @@ def publish():
             'image_base64': image_base64,
             'time': datetime.datetime.now().isoformat()
         }
+
         products.append(product)
         save_data()
+
         return jsonify({'success': True, 'message': 'Produit publié avec succès !'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# ====================== LANCEMENT ======================
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    # Sur Render, la variable PORT est définie automatiquement
+    port = int(os.environ.get('PORT', 5000))
+    socketio.run(app, host='0.0.0.0', port=port)

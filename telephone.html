@@ -4,77 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Téléphones - Mon E-Shop</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; font-family: Arial, sans-serif; }
-        .product-card { margin-bottom: 20px; }
-        .product-img { height: 200px; object-fit: cover; }
-        .whatsapp-btn { background-color: #25D366; color: white; }
-        #products-container { overflow-y: auto; max-height: 100vh; }
+        body { background:#f8f9fa; padding-top: 20px; }
+        .whatsapp-btn { background:#25D366; color:white; }
+        .product-img { height: 220px; object-fit: cover; }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">Mon E-Shop</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="/electronique">Électronique</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/vetements">Vêtements</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/maison">Maison</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/cuisine">Cuisine</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container my-5">
-        <h1 class="text-center mb-4">Téléphones</h1>
-        <div id="products-container" class="row">
-            <!-- Les produits seront ajoutés ici par JS -->
-        </div>
+    <div class="container">
+        <h1 class="text-center my-4">Téléphones</h1>
+        <a href="/electronique" class="btn btn-secondary mb-4">Retour à Électronique</a>
+        <div class="row" id="products-container"></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let currentSubcat = "Téléphones";
+        const currentSubcat = "Téléphones";
 
         function loadProducts() {
             fetch('/api/products')
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(products => {
                     const container = document.getElementById('products-container');
-                    container.innerHTML = ''; // Vider avant d'ajouter
-                    const filtered = products.filter(p => p.category === 'Électronique' && p.subcategory === currentSubcat);
-                    filtered.forEach(product => {
-                        const card = `
-                            <div class="col-md-4 product-card">
-                                <div class="card shadow">
-                                    <img src="${product.image_base64}" class="card-img-top product-img" alt="${product.title}">
-                                    <div class="card-body">
-                                        <h5 class="card-title">${product.title}</h5>
-                                        <p class="card-text">Prix: ${product.price} €</p>
-                                        <p class="card-text">Livraison: ${product.shipping_price} €</p>
-                                        <p class="card-text">Stock: ${product.stock}</p>
-                                        <p class="card-text">${product.desc}</p>
-                                        <a href="https://wa.me/${product.phone}?text=Je%20suis%20intéressé%20par%20${encodeURIComponent(product.title)}" class="btn whatsapp-btn">Contacter sur WhatsApp</a>
-                                    </div>
+                    container.innerHTML = '';
+                    const filtered = products.filter(p => 
+                        p.category === 'Électronique' && p.subcategory === currentSubcat
+                    );
+
+                    if (filtered.length === 0) {
+                        container.innerHTML = '<p class="text-center col">Aucun téléphone pour le moment.</p>';
+                        return;
+                    }
+
+                    filtered.forEach(p => {
+                        container.innerHTML += `
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 shadow">
+                                <img src="${p.image_base64}" class="card-img-top product-img" alt="${p.title}">
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">${p.title}</h5>
+                                    <p class="text-muted">${p.desc}</p>
+                                    <p><strong>${p.price} €</strong> + ${p.shipping_price} € livraison</p>
+                                    <p>Stock : ${p.stock}</p>
+                                    <a href="https://wa.me/${p.phone}?text=Salut%20${p.username}%20!%20Je%20suis%20intéressé%20par%20${encodeURIComponent(p.title)}" 
+                                       class="btn whatsapp-btn mt-auto">Contacter sur WhatsApp</a>
                                 </div>
                             </div>
-                        `;
-                        container.innerHTML += card;
+                        </div>`;
                     });
-                    if (filtered.length === 0) {
-                        container.innerHTML = '<p class="text-center">Aucun produit disponible pour le moment.</p>';
-                    }
-                })
-                .catch(error => console.error('Erreur:', error));
+                });
         }
-
-        // Charger les produits au démarrage
         window.onload = loadProducts;
     </script>
 </body>
