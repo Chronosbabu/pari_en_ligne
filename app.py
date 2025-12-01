@@ -89,7 +89,6 @@ def create_subcategory_page(main_cat, sub_cat):
 
     if os.path.exists(filepath):
         return  # déjà créé
-        return
 
     # Adaptations du template
     content = content.replace(f"{main_cat} - Mon E-Shop", f"{sub_cat} - Mon E-Shop")
@@ -184,7 +183,7 @@ def add_subcategory():
 
         if not main_cat or main_cat not in subcategories:
             return jsonify({'error': 'Catégorie principale invalide'}), 400
-        if not sub_cat:   # <-- LA LIGNE CORRIGÉE
+        if not sub_cat:
             return jsonify({'error': 'Nom de sous-catégorie requis'}), 400
         if sub_cat in subcategories[main_cat]:
             return jsonify({'error': 'Cette sous-catégorie existe déjà'}), 400
@@ -262,6 +261,5 @@ def publish():
 
 # ====================== LANCEMENT ======================
 if __name__ == '__main__':
-    # Sur Render, la variable PORT est définie automatiquement
     port = int(os.environ.get('PORT', 5000))
     socketio.run(app, host='0.0.0.0', port=port)
