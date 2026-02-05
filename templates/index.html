@@ -1,18 +1,85 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="utf-8">
     <title>Mon Play Store</title>
-</head>
-<body>
-    <h1>Mes applications</h1>
 
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 15px;
+            background: #1a73e8;
+            color: white;
+            margin: 0;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            padding: 15px;
+        }
+
+        .app-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .app-card img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        .app-name {
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 8px 12px;
+            background: #1a73e8;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .download-btn:active {
+            background: #1558b0;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Mes applications</h1>
+
+<div class="container">
     {% for app in apps %}
-        <div style="margin:20px">
-            <img src="/static/icons/{{ app.icon }}" width="80"><br>
-            <strong>{{ app.name }}</strong><br>
-            <a href="/download/{{ app.apk }}">Télécharger</a>
+        <div class="app-card">
+            <img src="/static/icons/{{ app.icon }}">
+            <div class="app-name">{{ app.name }}</div>
+            <a class="download-btn" href="/download/{{ app.apk }}">
+                Télécharger
+            </a>
         </div>
     {% endfor %}
+</div>
+
 </body>
 </html>
+
