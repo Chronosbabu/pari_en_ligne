@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Mon Play Store</title>
+</head>
+<body>
+    <h1>Mes applications</h1>
+
+    {% for app in apps %}
+        <div style="margin:20px">
+            <img src="/static/icons/{{ app.icon }}" width="80"><br>
+            <strong>{{ app.name }}</strong><br>
+            <a href="/download/{{ app.apk }}">Télécharger</a>
+        </div>
+    {% endfor %}
+</body>
+</html>
