@@ -1,85 +1,248 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="utf-8">
-    <title>Mon Play Store</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chronos - Plateforme Sociale</title>
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f2f2f2;
-        }
-
-        h1 {
-            text-align: center;
-            padding: 15px;
-            background: #1a73e8;
-            color: white;
-            margin: 0;
-        }
-
-        .container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 15px;
-            padding: 15px;
-        }
-
-        .app-card {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .app-card img {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-        }
-
-        .app-name {
-            margin: 10px 0;
-            font-weight: bold;
-        }
-
-        .download-btn {
-            display: inline-block;
-            padding: 8px 12px;
-            background: #1a73e8;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .download-btn:active {
-            background: #1558b0;
-        }
-    </style>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:#0f172a;color:#f1f5f9;line-height:1.7;overflow-x:hidden;}
+.fade-in{opacity:0;transform:translateY(40px);transition:all 0.8s ease;}
+.fade-in.visible{opacity:1;transform:translateY(0);}
+nav{position:fixed;top:0;width:100%;padding:20px 40px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.4);backdrop-filter:blur(15px);z-index:1000;}
+nav h3{font-weight:700;letter-spacing:1px;}
+nav a{color:white;text-decoration:none;margin-left:25px;font-weight:500;opacity:0.85;transition:0.3s;}
+nav a:hover{opacity:1;}
+header{padding:190px 20px 150px;text-align:center;background:linear-gradient(135deg,#405DE6,#5851DB,#833AB4,#C13584,#E1306C,#FD1D1D,#F56040,#F77737);background-size:300% 300%;animation:gradientMove 10s ease infinite;color:white;}
+@keyframes gradientMove{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+header h1{font-size:3.5em;font-weight:700;margin-bottom:20px;}
+header p{max-width:800px;margin:auto;font-size:1.25em;line-height:1.6;}
+.btn-primary{display:inline-block;margin-top:40px;padding:18px 50px;border-radius:60px;background:white;color:#C13584;font-weight:600;text-decoration:none;transition:0.4s;}
+.btn-primary:hover{transform:translateY(-5px);}
+section{padding:100px 20px;max-width:1100px;margin:auto;}
+h2{text-align:center;font-size:2.5em;margin-bottom:60px;position:relative;}
+h2::after{content:"";display:block;width:80px;height:4px;margin:20px auto 0;background:linear-gradient(90deg,#C13584,#E1306C);border-radius:5px;}
+.faq-item{background:rgba(255,255,255,0.05);backdrop-filter:blur(15px);border-radius:20px;margin-bottom:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);transition:0.3s;}
+.faq-item:hover{transform:translateY(-3px);}
+.faq-item button{width:100%;padding:25px 30px;border:none;background:none;color:white;text-align:left;font-size:1.1em;font-weight:600;cursor:pointer;position:relative;}
+.faq-item button::after{content:"+";position:absolute;right:30px;font-size:1.6em;transition:0.3s;}
+.faq-item.active button::after{transform:rotate(45deg);}
+.answer{padding:0 30px 25px 30px;display:none;color:#cbd5e1;line-height:1.5;}
+form{background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);padding:60px;border-radius:25px;border:1px solid rgba(255,255,255,0.1);}
+form input,form select,form textarea{width:100%;padding:18px;margin-bottom:25px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.07);color:white;font-size:1em;}
+form input:focus,form select:focus,form textarea:focus{border-color:#C13584;outline:none;box-shadow:0 0 15px rgba(193,53,132,0.4);}
+form button{width:100%;padding:18px;border:none;border-radius:50px;background:linear-gradient(90deg,#C13584,#E1306C);color:white;font-size:1.1em;font-weight:600;cursor:pointer;transition:0.3s;}
+form button:hover{transform:translateY(-3px);}
+footer{padding:60px 20px;text-align:center;background:linear-gradient(135deg,#405DE6,#5851DB,#833AB4,#C13584,#E1306C,#FD1D1D,#F56040,#F77737);color:white;}
+footer img{margin:0 15px;filter:invert(1);opacity:0.9;transition:0.3s;}
+footer img:hover{opacity:1;transform:scale(1.2);}
+.notification{position: fixed; top:20px; right:20px; background:#C13584; color:white; padding:20px 30px; border-radius:12px; box-shadow:0 8px 25px rgba(0,0,0,0.2); display:none; font-weight:600; z-index:1000;}
+@media(max-width:768px){header h1{font-size:2.2em;}nav{padding:15px;}form{padding:30px;}}
+</style>
 </head>
 
 <body>
 
-<h1>Mes applications</h1>
-
-<div class="container">
-    {% for app in apps %}
-        <div class="app-card">
-            <img src="/static/icons/{{ app.icon }}">
-            <div class="app-name">{{ app.name }}</div>
-            <a class="download-btn" href="/download/{{ app.apk }}">
-                Télécharger
-            </a>
-        </div>
-    {% endfor %}
+<nav class="fade-in">
+<h3>Chronos</h3>
+<div>
+<a href="#faq">FAQ</a>
+<a href="#contact">Contact</a>
 </div>
+</nav>
+
+<header class="fade-in">
+<h1>Bienvenue sur Chronos</h1>
+<img src="/static/icons/{{ apps[0].icon }}" alt="Icône de l'application" style="width:120px; height:120px; object-fit: contain; margin: 20px auto; display: block; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+<p>
+Discutez, collaborez et gagnez ensemble.<br>
+Une plateforme sociale moderne pour échanger avec vos proches, développer votre activité et créer des opportunités de revenus.
+</p>
+<a href="/download/{{ apps[0].apk }}" class="btn-primary">Télécharger maintenant</a>
+</header>
+
+<section id="faq" class="fade-in">
+<h2>Foire aux questions (FAQ)</h2>
+
+<div class="faq-item fade-in">
+<button>Qu'est-ce-que Chronos ?</button>
+<div class="answer">
+<p>
+C'est une plateforme où des personnes se réunissent pour échanger, créer des opportunités et collaborer professionnellement ou socialement. Profitez de vos livraisons, de promouvoir vos activités grâce à la publicité et de recevoir des récompenses selon votre engagement.
+</p>
+</div>
+</div>
+
+<div class="faq-item fade-in">
+<button>Qui peut s’inscrire sur Chronos ?</button>
+<div class="answer">
+<p>
+Toute personne respectant nos Conditions d’Utilisation et nos Standards de la Communauté.
+</p>
+</div>
+</div>
+
+<div class="faq-item fade-in">
+<button>Comment puis-je créer mon compte ?</button>
+<div class="answer">
+<p>
+Téléchargez l'application, cliquez sur "s'inscrire" et suivez les étapes de vérification.
+</p>
+</div>
+</div>
+
+<div class="faq-item fade-in">
+<button>Chronos est-il gratuit ?</button>
+<div class="answer">
+<p>
+Oui, l'inscription et l'utilisation sont gratuites. Mais certains services spécifiques peuvent inclure des frais.
+</p>
+</div>
+</div>
+
+<div class="faq-item fade-in">
+<button>Mes données sont-elles protégées ?</button>
+<div class="answer">
+<p>
+Oui. Nous utilisons des systèmes de sécurité pour protéger vos informations personnelles.
+</p>
+</div>
+</div>
+
+<div class="faq-item fade-in">
+<button>Comment gagner des revenus sur la plateforme ?</button>
+<div class="answer">
+<p>
+Vous pouvez générer des revenus via : Les livraisons, la publicité et les services proposés sur la plateforme.
+</p>
+</div>
+</div>
+
+<div class="faq-item fade-in">
+<button>Quels contenus sont interdits ?</button>
+<div class="answer">
+<p>
+Les contenus violents, haineux, frauduleux ou illégaux sont strictement interdits.
+</p>
+</div>
+</div>
+
+<div class="faq-item fade-in">
+<button>Que se passe-t-il en cas de non-respect des règles ?</button>
+<div class="answer">
+<p>
+Le compte peut être suspendu ou supprimé selon la gravité de la violation.
+</p>
+</div>
+</div>
+
+</section>
+
+<section id="contact" class="fade-in">
+<h2>Contact</h2>
+<p style="text-align:center;margin-bottom:30px;">
+Pour toute question, suggestion, ou opportunité d'investissement, merci de nous contacter via le formulaire ci-dessous.
+</p>
+
+<form action="https://formspree.io/f/mvzbarzd" method="POST" class="fade-in">
+
+<input type="text" name="Nom" placeholder="Nom complet" required>
+
+<input type="email" name="Email" placeholder="E-mail" required>
+
+<select name="Sujet" id="sujetSelect" required>
+<option value="">Sujet</option>
+<option value="Question">Question</option>
+<option value="Suggestion">Suggestion</option>
+<option value="Investissement">Investissement</option>
+<option value="Autre">Autre</option>
+</select>
+
+<input type="text" id="autreSujet" name="AutreSujet"
+placeholder="Écrivez votre sujet ici"
+style="display:none;">
+
+<textarea name="Message" rows="5" placeholder="Message" required></textarea>
+
+<button type="submit">Envoyer</button>
+
+</form>
+</section>
+
+<footer class="fade-in">
+<p>©️ 2026 Chronos. Tous les droits sont réservés.</p>
+<p>Réseaux sociaux :</p>
+<p>
+<a href="https://www.tiktok.com/@chronosxcommande?_r=1&_t=ZS-93nb8TBKjcz" target="_blank"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/tiktok.svg" width="28" alt="TikTok"></a>
+<a href="https://www.instagram.com/chronos.xcommande?igsh=aXlkZWRkazV1cHl5" target="_blank"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" width="28" alt="Instagram"></a>
+<a href="https://www.facebook.com/share/1FrGqvuTxH/" target="_blank"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg" width="28" alt="Facebook"></a>
+</p>
+</footer>
+
+<div class="notification" id="notification">Message envoyé ! ✅</div>
+
+<script>
+// FAQ accordéon
+const faqItems=document.querySelectorAll('.faq-item');
+faqItems.forEach(item=>{
+item.querySelector('button').addEventListener('click',()=>{
+item.classList.toggle('active');
+const answer=item.querySelector('.answer');
+answer.style.display=answer.style.display==='block'?'none':'block';
+});
+});
+
+// Formulaire "autre sujet"
+const sujetSelect=document.getElementById('sujetSelect');
+const autreSujet=document.getElementById('autreSujet');
+
+sujetSelect.addEventListener('change',function(){
+if(this.value==='Autre'){
+autreSujet.style.display='block';
+autreSujet.required=true;
+}else{
+autreSujet.style.display='none';
+autreSujet.required=false;
+}
+});
+
+// Formulaire Formspree avec notification
+const form=document.querySelector('form');
+const notification=document.getElementById('notification');
+
+form.addEventListener('submit',function(e){
+e.preventDefault();
+const formData=new FormData(form);
+if(sujetSelect.value==='Autre'){formData.set('Sujet',autreSujet.value);}
+fetch(form.action,{
+method:"POST",
+body:formData,
+headers:{'Accept':'application/json'}
+}).then(response=>{
+if(response.ok){
+notification.style.display='block';
+form.reset();
+autreSujet.style.display='none';
+setTimeout(()=>{notification.style.display='none';},3000);
+}else{alert("Erreur lors de l'envoi. Veuillez réessayer.");}
+}).catch(()=>{alert("Erreur réseau. Veuillez réessayer.");});
+});
+
+// Fade-in au scroll
+const faders=document.querySelectorAll('.fade-in');
+const appearOptions={threshold:0.2, rootMargin:"0px 0px -50px 0px"};
+
+const appearOnScroll=new IntersectionObserver(function(entries,observer){
+entries.forEach(entry=>{
+if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target);}
+});
+},appearOptions);
+
+faders.forEach(fader=>appearOnScroll.observe(fader));
+</script>
 
 </body>
 </html>
-
