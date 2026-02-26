@@ -6,6 +6,7 @@
 <title>Chronos - Plateforme Sociale</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
@@ -20,8 +21,50 @@ header{padding:190px 20px 150px;text-align:center;background:linear-gradient(135
 @keyframes gradientMove{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
 header h1{font-size:3.5em;font-weight:700;margin-bottom:20px;}
 header p{max-width:800px;margin:auto;font-size:1.25em;line-height:1.6;}
-.btn-primary{display:inline-block;margin-top:40px;padding:18px 50px;border-radius:60px;background:white;color:#C13584;font-weight:600;text-decoration:none;transition:0.4s;}
-.btn-primary:hover{transform:translateY(-5px);}
+
+.btn-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+}
+
+.btn-primary,
+.btn-xcommand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 50px;
+    border-radius: 60px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.4s;
+    font-size: 1.1em;
+}
+
+.btn-primary {
+    background: white;
+    color: #C13584;
+}
+
+.btn-primary:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(193,53,132,0.4);
+}
+
+.btn-xcommand {
+    background: #2d3748;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.btn-xcommand:hover {
+    transform: translateY(-5px);
+    background: #374151;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
 section{padding:100px 20px;max-width:1100px;margin:auto;}
 h2{text-align:center;font-size:2.5em;margin-bottom:60px;position:relative;}
 h2::after{content:"";display:block;width:80px;height:4px;margin:20px auto 0;background:linear-gradient(90deg,#C13584,#E1306C);border-radius:5px;}
@@ -40,7 +83,13 @@ footer{padding:60px 20px;text-align:center;background:linear-gradient(135deg,#40
 footer img{margin:0 15px;filter:invert(1);opacity:0.9;transition:0.3s;}
 footer img:hover{opacity:1;transform:scale(1.2);}
 .notification{position: fixed; top:20px; right:20px; background:#C13584; color:white; padding:20px 30px; border-radius:12px; box-shadow:0 8px 25px rgba(0,0,0,0.2); display:none; font-weight:600; z-index:1000;}
-@media(max-width:768px){header h1{font-size:2.2em;}nav{padding:15px;}form{padding:30px;}}
+@media(max-width:768px){
+    header h1{font-size:2.2em;}
+    nav{padding:15px;}
+    form{padding:30px;}
+    .btn-container{flex-direction:column;align-items:center;}
+    .btn-primary, .btn-xcommand{padding:16px 60px;}
+}
 </style>
 </head>
 
@@ -61,7 +110,18 @@ footer img:hover{opacity:1;transform:scale(1.2);}
 Discutez, collaborez et gagnez ensemble.<br>
 Une plateforme sociale moderne pour échanger avec vos proches, développer votre activité et créer des opportunités de revenus.
 </p>
-<a href="/download/{{ apps[0].apk }}" class="btn-primary">Télécharger maintenant</a>
+
+<div class="btn-container">
+    <a href="/download/{{ apps[0].apk }}" class="btn-primary">
+        <i class="fab fa-android fa-lg"></i>
+        Télécharger maintenant
+    </a>
+    
+    <a href="#" class="btn-xcommand" title="x-command (appel)">
+        <i class="fas fa-phone-volume fa-lg"></i>
+        x-command
+    </a>
+</div>
 </header>
 
 <section id="faq" class="fade-in">
