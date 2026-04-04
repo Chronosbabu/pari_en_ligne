@@ -6,88 +6,142 @@
     <title>Mes Résultats - UNILU</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .result-card { transition: all 0.3s; }
-        .result-card:hover { transform: translateY(-4px); box-shadow: 0 20px 30px rgba(0,31,63,0.2); }
+        body { background: #f8fafc; }
+        .header { background: linear-gradient(90deg, #001f3f, #003366); }
+        .section-title { font-size: 1.35rem; letter-spacing: -0.02em; }
+        .result-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .result-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 25px -5px rgb(0 31 63 / 0.1);
+        }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="max-w-5xl mx-auto p-8">
-        <div class="bg-[#001f3f] text-white rounded-3xl p-8 mb-10 flex justify-between items-center">
+<body class="min-h-screen pb-12">
+    <!-- Header -->
+    <div class="header text-white py-8">
+        <div class="max-w-5xl mx-auto px-8 flex justify-between items-center">
             <div>
-                <h1 class="text-3xl font-bold">UNILU - Résultats Académiques</h1>
-                <p id="welcome" class="text-xl mt-2"></p>
+                <h1 class="text-4xl font-bold tracking-tight">UNILU</h1>
+                <p class="text-xl mt-1 opacity-90">Plateforme des Résultats Académiques</p>
             </div>
             <div class="text-right">
-                <p class="text-sm opacity-75">Matricule :</p>
-                <p id="matricule-display" class="text-2xl font-mono"></p>
+                <p id="matricule-display" class="font-mono text-lg opacity-75"></p>
+                <p id="welcome" class="text-2xl font-medium mt-1"></p>
             </div>
         </div>
+    </div>
 
-        <div id="results-container" class="space-y-12"></div>
+    <div class="max-w-5xl mx-auto px-8 mt-10">
+        <div id="results-container"></div>
     </div>
 
     <script>
         async function loadResults() {
             const urlParams = new URLSearchParams(window.location.search);
             const matricule = urlParams.get('matricule');
+            
+            if (!matricule) return;
+
             document.getElementById('matricule-display').textContent = matricule;
 
+            // Récupération des résultats
             const res = await fetch(`/api/get_results?matricule=${matricule}`);
             const results = await res.json();
 
-            // Récupérer le nom pour le message de bienvenue
+            // Récupération du nom de l'étudiant
             const validateRes = await fetch('/api/validate_matricule', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({matricule})
             });
             const studentData = await validateRes.json();
-            document.getElementById('welcome').innerHTML = `👋 Bienvenue <span class="font-bold">${studentData.nom_complet}</span> !`;
+
+            document.getElementById('welcome').innerHTML = 
+                `👋 Bienvenue <span class="font-semibold">${studentData.nom_complet}</span>`;
 
             const container = document.getElementById('results-container');
-            container.innerHTML = `
-                <h2 class="text-3xl font-semibold text-[#001f3f] mb-6">📋 Vos résultats</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="interro-section"></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12" id="examen-section"></div>
+
+            // Séparation des résultats
+            const interrogations = results.filter(r => r.type === 'interrogation');
+            const examens = results.filter(r => r.type === 'examen');
+
+            let html = `
+                <h2 class="text-3xl font-semibold text-[#001f3f] mb-8">📋 Vos résultats</h2>
+                
+                <!-- Section Interrogations -->
+                <div class="mb-16">
+                    <h3 class="section-title text-[#001f3f] font-semibold mb-6 flex items-center gap-3">
+                        <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
+                        INTERROGATIONS
+                    </h3>
+                    <div id="interro-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                </div>
+
+                <!-- Section Examens -->
+                <div>
+                    <h3 class="section-title text-[#001f3f] font-semibold mb-6 flex items-center gap-3">
+                        <span class="w-3 h-3 bg-purple-600 rounded-full"></span>
+                        EXAMENS
+                    </h3>
+                    <div id="examen-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                </div>
             `;
 
-            const interroDiv = document.getElementById('interro-section');
-            const examenDiv = document.getElementById('examen-section');
+            container.innerHTML = html;
 
-            let hasInterro = false, hasExamen = false;
+            const interroGrid = document.getElementById('interro-grid');
+            const examenGrid = document.getElementById('examen-grid');
 
-            results.forEach(r => {
-                const isFail = r.status === 'ÉCHEC';
-                const card = `
-                <div class="result-card bg-white border border-gray-200 rounded-3xl p-8 ${isFail ? 'border-red-500' : ''}">
-                    <div class="flex justify-between items-start">
+            // Fonction pour créer une carte
+            function createCard(r) {
+                const isEchec = r.status === 'ÉCHEC';
+                return `
+                <div class="result-card bg-white rounded-3xl shadow-sm border border-gray-100 p-7">
+                    <div class="flex justify-between items-start mb-6">
                         <div>
-                            <span class="inline-block px-4 py-1 rounded-3xl text-sm font-bold ${r.type === 'interrogation' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}">
-                                ${r.type === 'interrogation' ? 'INTERROGATION' : 'EXAMEN'}
+                            <span class="inline-flex items-center px-4 py-1.5 rounded-3xl text-xs font-semibold tracking-wider
+                                ${r.type === 'interrogation' 
+                                    ? 'bg-blue-100 text-blue-700' 
+                                    : 'bg-purple-100 text-purple-700'}">
+                                ${r.type.toUpperCase()}
                             </span>
-                            <h3 class="text-2xl font-semibold mt-4">${r.course}</h3>
-                            <p class="text-5xl font-bold mt-6 ${isFail ? 'text-red-600' : 'text-[#001f3f]'}">${r.cote} / ${r.ponderation}</p>
-                            <p class="text-sm text-gray-500 mt-2">${r.date}</p>
+                            <h4 class="text-xl font-semibold text-gray-800 mt-4">${r.course}</h4>
                         </div>
+                        
                         <div class="text-right">
-                            <span class="px-6 py-3 rounded-3xl text-lg font-bold ${isFail ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
+                            <span class="px-5 py-2 rounded-3xl text-sm font-bold
+                                ${isEchec 
+                                    ? 'bg-red-100 text-red-700' 
+                                    : 'bg-emerald-100 text-emerald-700'}">
                                 ${r.status}
                             </span>
                         </div>
                     </div>
+
+                    <div class="flex items-baseline gap-3">
+                        <span class="text-6xl font-semibold text-[#001f3f]">${r.cote}</span>
+                        <span class="text-3xl text-gray-400">/</span>
+                        <span class="text-3xl font-medium text-gray-400">${r.ponderation}</span>
+                    </div>
+
+                    <p class="text-sm text-gray-500 mt-6">${r.date}</p>
                 </div>`;
+            }
 
-                if (r.type === 'interrogation') {
-                    interroDiv.innerHTML += card;
-                    hasInterro = true;
-                } else {
-                    examenDiv.innerHTML += card;
-                    hasExamen = true;
-                }
-            });
+            // Remplissage des sections
+            if (interrogations.length === 0) {
+                interroGrid.innerHTML = `<p class="text-gray-400 text-center py-12 col-span-2">Aucune interrogation publiée pour le moment.</p>`;
+            } else {
+                interrogations.forEach(r => interroGrid.innerHTML += createCard(r));
+            }
 
-            if (!hasInterro) interroDiv.innerHTML = `<p class="text-gray-400 col-span-2 text-center py-12">Aucune interrogation publiée pour le moment.</p>`;
-            if (!hasExamen) examenDiv.innerHTML = `<p class="text-gray-400 col-span-2 text-center py-12">Aucun examen publié pour le moment.</p>`;
+            if (examens.length === 0) {
+                examenGrid.innerHTML = `<p class="text-gray-400 text-center py-12 col-span-2">Aucun examen publié pour le moment.</p>`;
+            } else {
+                examens.forEach(r => examenGrid.innerHTML += createCard(r));
+            }
         }
 
         window.onload = loadResults;
