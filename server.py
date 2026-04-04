@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory
 import sqlite3
 import datetime
-import os
 
 app = Flask(__name__)
 
@@ -21,7 +20,8 @@ def init_db():
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     matricule TEXT NOT NULL,
                     course TEXT NOT NULL,
-                    result_type TEXT NOT NULL CHECK(result_type IN ('interrogation', 'examen')),
+                    result_type TEXT NOT NULL 
+                        CHECK(result_type IN ('td', 'tp', 'application', 'interrogation', 'examen')),
                     cote REAL NOT NULL,
                     ponderation INTEGER NOT NULL,
                     publication_date TEXT NOT NULL)''')
@@ -37,6 +37,21 @@ def home():
 @app.route('/perso.html')
 def perso():
     return send_from_directory('page', 'perso.html')
+
+# Debug : voir tous les résultats
+@app.route('/api/all_results', methods=['GET'])
+def all_results():
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute("SELECT * FROM results ORDER BY course, result_type, publication_date DESC")
+    rows = c.fetchall()
+    conn.close()
+    data = [{
+        "id": r[0], "matricule": r[1], "course": r[2], "type": r[3],
+        "cote": r[4], "ponderation": r[5], "date": r[6]
+    } for r in rows]
+    print("=== DEBUG : Résultats dans la base ===", data)
+    return jsonify(data)
 
 @app.route('/api/register_student', methods=['POST'])
 def register_student():
@@ -109,8 +124,8 @@ def get_results():
     matricule = request.args.get('matricule')
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-    c.execute("""SELECT course, result_type, cote, ponderation, publication_date 
-                 FROM results WHERE matricule=? ORDER BY publication_date DESC""", (matricule,))
+    c.execute("""SELECT course, result_type, cote, ponderation, publication_date
+                 FROM results WHERE matricule=? ORDER BY course, result_type, publication_date DESC""", (matricule,))
     rows = c.fetchall()
     conn.close()
     results = [{
@@ -119,7 +134,7 @@ def get_results():
         'cote': r[2],
         'ponderation': r[3],
         'date': r[4],
-        'status': 'ÉCHEC' if r[2] < r[3]/2 else 'VALIDÉ'
+        'status': 'ÉCHEC' if r[2] < r[3]/2 else 'RÉUSSITE'
     } for r in rows]
     return jsonify(results)
 

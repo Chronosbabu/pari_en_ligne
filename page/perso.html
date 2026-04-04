@@ -8,56 +8,22 @@
     <style>
         body { background: #f8fafc; }
         .header { background: linear-gradient(90deg, #001f3f, #003366); }
-        
-        .nav-fixed {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            background: white;
-            box-shadow: 0 4px 12px rgba(0, 31, 63, 0.1);
-        }
-
-        .tab-button {
-            transition: all 0.3s ease;
-            font-size: 1.1rem;
-        }
-        @media (max-width: 640px) {
-            .tab-button { font-size: 1rem; padding: 16px 12px; }
-        }
-
-        .tab-button.active {
-            background-color: #001f3f;
-            color: white;
-            box-shadow: 0 10px 15px rgba(0, 31, 63, 0.2);
-        }
-
-        .result-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .result-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 25px -5px rgb(0 31 63 / 0.1);
-        }
-
-        .note-score {
-            font-size: 2.8rem;
-        }
-        @media (min-width: 640px) {
-            .note-score { font-size: 3.8rem; }
-        }
+        .nav-fixed { position: sticky; top: 0; z-index: 50; background: white; box-shadow: 0 4px 12px rgba(0,31,63,0.1); }
+        .result-card { transition: all 0.3s; }
+        .result-card:hover { transform: translateY(-3px); }
+        table { border-collapse: collapse; }
+        th, td { padding: 12px 16px; text-align: center; }
     </style>
 </head>
 <body class="min-h-screen pb-12">
-
-    <!-- HEADER -->
     <div class="header text-white py-6 md:py-8">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 class="text-3xl md:text-4xl font-bold tracking-tight">UNILU</h1>
+                    <h1 class="text-3xl md:text-4xl font-bold">UNILU</h1>
                     <p class="text-lg md:text-xl mt-1 opacity-90">Plateforme des Résultats Académiques</p>
                 </div>
-                <div class="text-left sm:text-right w-full sm:w-auto">
+                <div class="text-left sm:text-right">
                     <p id="matricule-display" class="font-mono text-base md:text-lg opacity-75"></p>
                     <p id="welcome" class="text-xl md:text-2xl font-medium"></p>
                 </div>
@@ -65,28 +31,19 @@
         </div>
     </div>
 
-    <!-- BARRE DE BOUTONS -->
     <div class="nav-fixed">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex flex-col sm:flex-row gap-3">
-                <button onclick="showSection('interrogation')" 
-                        id="btn-interro"
-                        class="tab-button active flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-3xl border-2 border-[#001f3f] font-semibold">
-                    <span class="text-2xl">📝</span>
-                    <span>INTERROGATIONS</span>
+                <button onclick="showSection('interrogation')" id="btn-interro" class="tab-button active flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-3xl border-2 border-[#001f3f] font-semibold">
+                    <span class="text-2xl">📝</span> INTERROGATIONS
                 </button>
-
-                <button onclick="showSection('examen')" 
-                        id="btn-examen"
-                        class="tab-button flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-3xl border-2 border-[#001f3f] font-semibold">
-                    <span class="text-2xl">📕</span>
-                    <span>EXAMENS</span>
+                <button onclick="showSection('examen')" id="btn-examen" class="tab-button flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-3xl border-2 border-[#001f3f] font-semibold">
+                    <span class="text-2xl">📕</span> EXAMENS
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- CONTENU -->
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
         <div id="results-container" class="space-y-12"></div>
     </div>
@@ -95,8 +52,7 @@
         let allResults = [];
 
         async function loadResults() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const matricule = urlParams.get('matricule');
+            const matricule = new URLSearchParams(window.location.search).get('matricule');
             if (!matricule) return;
 
             document.getElementById('matricule-display').textContent = matricule;
@@ -107,8 +63,7 @@
                 body: JSON.stringify({matricule})
             });
             const studentData = await validateRes.json();
-            document.getElementById('welcome').innerHTML = 
-                `👋 Bienvenue <span class="font-semibold">${studentData.nom_complet}</span>`;
+            document.getElementById('welcome').innerHTML = `👋 Bienvenue <span class="font-semibold">${studentData.nom_complet}</span>`;
 
             const res = await fetch(`/api/get_results?matricule=${matricule}`);
             allResults = await res.json();
@@ -117,82 +72,114 @@
             container.innerHTML = `
                 <div class="text-center py-12 md:py-20">
                     <h2 class="text-3xl font-semibold text-[#001f3f] mb-3">📋 Vos résultats</h2>
-                    <p class="text-gray-500 text-base md:text-lg">Cliquez sur l'un des boutons ci-dessus pour voir vos notes</p>
+                    <p class="text-gray-500">Cliquez sur un bouton ci-dessus</p>
                 </div>
-                
-                <div id="section-interro" class="hidden">
-                    <h3 class="text-2xl font-semibold text-[#001f3f] mb-8 flex items-center gap-3">
-                        <span class="w-4 h-4 bg-blue-500 rounded-full"></span>
-                        INTERROGATIONS
-                    </h3>
-                    <div id="interro-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-                </div>
-
-                <div id="section-examen" class="hidden">
-                    <h3 class="text-2xl font-semibold text-[#001f3f] mb-8 flex items-center gap-3">
-                        <span class="w-4 h-4 bg-purple-600 rounded-full"></span>
-                        EXAMENS
-                    </h3>
-                    <div id="examen-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-                </div>
+                <div id="section-interro" class="hidden"></div>
+                <div id="section-examen" class="hidden"></div>
             `;
         }
 
-        function createCard(r) {
+        function createExamenCard(r) {
             const isEchec = r.status === 'ÉCHEC';
             return `
-            <div class="result-card bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-7">
-                <div class="flex justify-between items-start mb-6">
+            <div class="result-card bg-white rounded-3xl shadow-sm border border-gray-100 p-7">
+                <div class="flex justify-between">
                     <div>
-                        <h4 class="text-xl font-semibold text-gray-800">${r.course}</h4>
+                        <span class="px-4 py-1 bg-purple-100 text-purple-700 rounded-3xl text-sm font-bold">EXAMEN</span>
+                        <h4 class="text-xl font-semibold mt-4">${r.course}</h4>
                     </div>
-                    <div>
-                        <span class="px-5 py-2 rounded-3xl text-sm font-bold
-                            ${isEchec ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">
-                            ${r.status}
-                        </span>
-                    </div>
+                    <span class="px-5 py-2 rounded-3xl text-sm font-bold ${isEchec ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${r.status}</span>
                 </div>
-                <div class="flex items-baseline gap-3">
-                    <span class="note-score font-semibold text-[#001f3f]">${r.cote}</span>
+                <div class="flex items-baseline gap-3 mt-8">
+                    <span class="text-6xl font-semibold text-[#001f3f]">${r.cote}</span>
                     <span class="text-3xl text-gray-400">/</span>
-                    <span class="text-3xl font-medium text-gray-400">${r.ponderation}</span>
+                    <span class="text-3xl text-gray-400">${r.ponderation}</span>
                 </div>
                 <p class="text-sm text-gray-500 mt-6">${r.date}</p>
             </div>`;
         }
 
+        function createInterroTable(courseResults) {
+            let rows = '';
+            let totalCote = 0;
+            let count = 0;
+
+            const order = ['td', 'tp', 'application', 'interrogation'];
+            const labels = {td: 'TD', tp: 'TP', application: 'Application', interrogation: 'Interrogation'};
+
+            order.forEach(key => {
+                const item = courseResults.find(r => r.type === key);
+                if (item) {
+                    const isEchec = item.status === 'ÉCHEC';
+                    rows += `
+                    <tr class="border-b">
+                        <td class="font-medium text-left">${labels[key]}</td>
+                        <td class="font-semibold">${item.cote} / ${item.ponderation}</td>
+                        <td class="${isEchec ? 'text-red-600' : 'text-emerald-600'}">${item.status}</td>
+                        <td class="text-xs text-gray-500">${item.date}</td>
+                    </tr>`;
+                    totalCote += item.cote;
+                    count++;
+                }
+            });
+
+            const moyenne = count > 0 ? (totalCote / count).toFixed(2) : 0;
+
+            return `
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-7">
+                <h4 class="text-xl font-semibold mb-6">${courseResults[0].course}</h4>
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b text-gray-500 text-sm">
+                            <th class="text-left">Composant</th>
+                            <th>Cote</th>
+                            <th>Statut</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                <div class="mt-6 flex justify-between items-center bg-gray-50 rounded-2xl p-4">
+                    <span class="font-semibold text-lg">Moyenne Interrogation :</span>
+                    <span class="text-4xl font-bold text-[#001f3f]">${moyenne}</span>
+                </div>
+            </div>`;
+        }
+
         function showSection(type) {
-            // Masquer les deux sections
             document.getElementById('section-interro').classList.add('hidden');
             document.getElementById('section-examen').classList.add('hidden');
-
-            // Désactiver les deux boutons
             document.getElementById('btn-interro').classList.remove('active');
             document.getElementById('btn-examen').classList.remove('active');
 
-            // Activer le bon bouton
-            if (type === 'interrogation') {
-                document.getElementById('btn-interro').classList.add('active');
-                document.getElementById('section-interro').classList.remove('hidden');
-            } else {
-                document.getElementById('btn-examen').classList.add('active');
-                document.getElementById('section-examen').classList.remove('hidden');
+            const container = document.getElementById(type === 'interrogation' ? 'section-interro' : 'section-examen');
+            container.classList.remove('hidden');
+
+            if (type === 'interrogation') document.getElementById('btn-interro').classList.add('active');
+            else document.getElementById('btn-examen').classList.add('active');
+
+            // Grouper par cours
+            const grouped = {};
+            allResults.filter(r => (type === 'interrogation' ? ['td','tp','application','interrogation'] : ['examen']).includes(r.type))
+                      .forEach(r => {
+                          if (!grouped[r.course]) grouped[r.course] = [];
+                          grouped[r.course].push(r);
+                      });
+
+            let html = `<h3 class="text-2xl font-semibold text-[#001f3f] mb-8">${type.toUpperCase()}</h3>`;
+            Object.keys(grouped).forEach(course => {
+                if (type === 'interrogation') {
+                    html += createInterroTable(grouped[course]);
+                } else {
+                    html += createExamenCard(grouped[course][0]);
+                }
+            });
+
+            if (Object.keys(grouped).length === 0) {
+                html += `<p class="text-gray-400 text-center py-16">Aucune ${type} publiée pour le moment.</p>`;
             }
 
-            // Filtre CORRIGÉ (on utilise maintenant le mot complet)
-            const filtered = allResults.filter(r => r.type === type);
-
-            const gridId = type === 'interrogation' ? 'interro-grid' : 'examen-grid';
-            const grid = document.getElementById(gridId);
-            grid.innerHTML = '';
-
-            if (filtered.length === 0) {
-                grid.innerHTML = `<p class="text-gray-400 text-center py-16">Aucune ${type === 'interrogation' ? 'interrogation' : 'examen'} publiée pour le moment.</p>`;
-                return;
-            }
-
-            filtered.forEach(r => grid.innerHTML += createCard(r));
+            container.innerHTML = html;
         }
 
         window.onload = loadResults;
