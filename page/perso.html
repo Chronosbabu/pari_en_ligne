@@ -9,7 +9,6 @@
         body { background: #f8fafc; }
         .header { background: linear-gradient(90deg, #001f3f, #003366); }
         
-        /* Barre fixe qui reste toujours visible */
         .nav-fixed {
             position: sticky;
             top: 0;
@@ -40,7 +39,6 @@
             box-shadow: 0 20px 25px -5px rgb(0 31 63 / 0.1);
         }
 
-        /* Taille de la note adaptée aux téléphones */
         .note-score {
             font-size: 2.8rem;
         }
@@ -67,18 +65,18 @@
         </div>
     </div>
 
-    <!-- BARRE DE BOUTONS TRÈS VISIBLE (fixe au scroll) -->
+    <!-- BARRE DE BOUTONS -->
     <div class="nav-fixed">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex flex-col sm:flex-row gap-3">
-                <button onclick="showSection('interro')"
+                <button onclick="showSection('interrogation')" 
                         id="btn-interro"
                         class="tab-button active flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-3xl border-2 border-[#001f3f] font-semibold">
                     <span class="text-2xl">📝</span>
                     <span>INTERROGATIONS</span>
                 </button>
 
-                <button onclick="showSection('examen')"
+                <button onclick="showSection('examen')" 
                         id="btn-examen"
                         class="tab-button flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-3xl border-2 border-[#001f3f] font-semibold">
                     <span class="text-2xl">📕</span>
@@ -88,7 +86,7 @@
         </div>
     </div>
 
-    <!-- CONTENU PRINCIPAL -->
+    <!-- CONTENU -->
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
         <div id="results-container" class="space-y-12"></div>
     </div>
@@ -165,13 +163,16 @@
         }
 
         function showSection(type) {
+            // Masquer les deux sections
             document.getElementById('section-interro').classList.add('hidden');
             document.getElementById('section-examen').classList.add('hidden');
 
+            // Désactiver les deux boutons
             document.getElementById('btn-interro').classList.remove('active');
             document.getElementById('btn-examen').classList.remove('active');
 
-            if (type === 'interro') {
+            // Activer le bon bouton
+            if (type === 'interrogation') {
                 document.getElementById('btn-interro').classList.add('active');
                 document.getElementById('section-interro').classList.remove('hidden');
             } else {
@@ -179,13 +180,15 @@
                 document.getElementById('section-examen').classList.remove('hidden');
             }
 
+            // Filtre CORRIGÉ (on utilise maintenant le mot complet)
             const filtered = allResults.filter(r => r.type === type);
-            const gridId = type === 'interro' ? 'interro-grid' : 'examen-grid';
+
+            const gridId = type === 'interrogation' ? 'interro-grid' : 'examen-grid';
             const grid = document.getElementById(gridId);
             grid.innerHTML = '';
 
             if (filtered.length === 0) {
-                grid.innerHTML = `<p class="text-gray-400 text-center py-16">Aucune ${type === 'interro' ? 'interrogation' : 'examen'} publiée pour le moment.</p>`;
+                grid.innerHTML = `<p class="text-gray-400 text-center py-16">Aucune ${type === 'interrogation' ? 'interrogation' : 'examen'} publiée pour le moment.</p>`;
                 return;
             }
 
