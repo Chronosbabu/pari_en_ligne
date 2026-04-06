@@ -15,12 +15,12 @@ def init_db():
                     post_nom TEXT NOT NULL,
                     prenom TEXT NOT NULL,
                     promotion TEXT NOT NULL)''')
+    
     c.execute('''CREATE TABLE IF NOT EXISTS results (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     matricule TEXT NOT NULL,
                     course TEXT NOT NULL,
-                    result_type TEXT NOT NULL
-                        CHECK(result_type IN ('moyenne_periode', 'examen')),
+                    result_type TEXT NOT NULL CHECK(result_type IN ('periode', 'examen')),
                     cote REAL NOT NULL,
                     ponderation INTEGER NOT NULL,
                     publication_date TEXT NOT NULL)''')
@@ -33,6 +33,11 @@ init_db()
 def home():
     return send_from_directory('page', 'style.html')
 
+@app.route('/perso.html')
+def perso():
+    return send_from_directory('page', 'perso.html')
+
+# Debug
 @app.route('/api/all_results', methods=['GET'])
 def all_results():
     conn = sqlite3.connect(DB_NAME)
@@ -40,11 +45,7 @@ def all_results():
     c.execute("SELECT * FROM results ORDER BY course, result_type, publication_date DESC")
     rows = c.fetchall()
     conn.close()
-    data = [{
-        "id": r[0], "matricule": r[1], "course": r[2], "type": r[3],
-        "cote": r[4], "ponderation": r[5], "date": r[6]
-    } for r in rows]
-    print("=== DEBUG : Résultats dans la base ===", data)
+    data = [{"id": r[0], "matricule": r[1], "course": r[2], "type": r[3], "cote": r[4], "ponderation": r[5], "date": r[6]} for r in rows]
     return jsonify(data)
 
 @app.route('/api/register_student', methods=['POST'])
@@ -65,11 +66,11 @@ def register_student():
         c.execute("""INSERT INTO students (matricule, nom, post_nom, prenom, promotion)
                      VALUES (?, ?, ?, ?, ?)""", (matricule, nom, post_nom, prenom, promotion))
         conn.commit()
-        conn.close()
         return jsonify({'success': True, 'matricule': matricule})
     except sqlite3.IntegrityError:
-        conn.close()
         return jsonify({'success': False, 'error': 'Étudiant déjà enregistré'}), 400
+    finally:
+        conn.close()
 
 @app.route('/api/students', methods=['GET'])
 def get_students():
@@ -97,6 +98,7 @@ def validate_matricule():
         return jsonify({'success': True, 'nom_complet': f"{student[2]} {student[0]} {student[1]}"})
     return jsonify({'success': False}), 404
 
+# Publication (utilisé pour nouveau + mise à jour)
 @app.route('/api/publish_result', methods=['POST'])
 def publish_result():
     data = request.json
@@ -111,22 +113,48 @@ def publish_result():
     conn.close()
     return jsonify({'success': True})
 
+# Mise à jour d'une note existante
+@app.route('/api/update_result', methods=['POST'])
+def update_result():
+    data = request.json
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute("""UPDATE results SET cote=?, ponderation=?, publication_date=?
+                 WHERE id=?""",
+              (data['cote'], data['ponderation'],
+               datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), data['id']))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+# Suppression d'une note
+@app.route('/api/delete_result', methods=['POST'])
+def delete_result():
+    data = request.json
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute("DELETE FROM results WHERE id=?", (data['id'],))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
 @app.route('/api/get_results', methods=['GET'])
 def get_results():
     matricule = request.args.get('matricule')
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-    c.execute("""SELECT course, result_type, cote, ponderation, publication_date
+    c.execute("""SELECT id, course, result_type, cote, ponderation, publication_date
                  FROM results WHERE matricule=? ORDER BY course, result_type, publication_date DESC""", (matricule,))
     rows = c.fetchall()
     conn.close()
     results = [{
-        'course': r[0],
-        'type': r[1],
-        'cote': r[2],
-        'ponderation': r[3],
-        'date': r[4],
-        'status': 'ÉCHEC' if r[2] < r[3]/2 else 'RÉUSSITE'
+        'id': r[0],
+        'course': r[1],
+        'type': r[2],
+        'cote': r[3],
+        'ponderation': r[4],
+        'date': r[5],
+        'status': 'ÉCHEC' if r[3] < r[4]/2 else 'RÉUSSITE'
     } for r in rows]
     return jsonify(results)
 
