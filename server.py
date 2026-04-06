@@ -1,9 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory
 import sqlite3
 import datetime
-
 app = Flask(__name__)
-
 DB_NAME = 'unilu.db'
 
 def init_db():
@@ -16,7 +14,7 @@ def init_db():
                     post_nom TEXT NOT NULL,
                     prenom TEXT NOT NULL,
                     promotion TEXT NOT NULL)''')
-   
+  
     c.execute('''CREATE TABLE IF NOT EXISTS results (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     matricule TEXT NOT NULL,
@@ -99,7 +97,6 @@ def validate_matricule():
         return jsonify({'success': True, 'nom_complet': f"{student[2]} {student[0]} {student[1]}"})
     return jsonify({'success': False}), 404
 
-# Publication (utilisé pour nouveau + mise à jour)
 @app.route('/api/publish_result', methods=['POST'])
 def publish_result():
     data = request.json
@@ -114,7 +111,6 @@ def publish_result():
     conn.close()
     return jsonify({'success': True})
 
-# Mise à jour d'une note existante
 @app.route('/api/update_result', methods=['POST'])
 def update_result():
     data = request.json
@@ -128,7 +124,6 @@ def update_result():
     conn.close()
     return jsonify({'success': True})
 
-# Suppression d'une note
 @app.route('/api/delete_result', methods=['POST'])
 def delete_result():
     data = request.json
