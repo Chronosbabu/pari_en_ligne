@@ -14,41 +14,79 @@
             border-radius: 16px; 
             box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
         }
+        .header { 
+            background: linear-gradient(90deg, #001f3f, #003366); 
+        }
         /* Correction importante : texte noir dans le champ input */
         input#matricule {
             color: #111827 !important; /* gris foncé très lisible */
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center">
-    <div class="card w-full max-w-md p-10">
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-[#001f3f]">UNILU</h1>
-            <p class="text-xl mt-2 text-gray-700">Plateforme des Résultats</p>
+<body class="min-h-screen">
+    <!-- ==================== HEADER COMMUN (logos + nom université) ==================== -->
+    <div class="header text-white py-6 md:py-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between gap-6">
+                
+                <!-- LOGO GAUCHE : unilu.png -->
+                <div class="flex-shrink-0">
+                    <img src="/static/unilu.png" 
+                         alt="Logo Université de Lubumbashi" 
+                         class="h-14 md:h-16 w-auto drop-shadow-md">
+                </div>
+
+                <!-- TEXTE CENTRAL -->
+                <div class="text-center flex-1">
+                    <h1 class="text-3xl md:text-4xl font-bold tracking-tight leading-none">
+                        UNIVERSITÉ DE LUBUMBASHI
+                    </h1>
+                    <p class="text-lg md:text-xl mt-1 font-medium opacity-95">
+                        FACULTÉ DE SCIENCES AGRONOMIQUES ET ENVIRONNEMENT
+                    </p>
+                    <!-- Titre de la plateforme (comme demandé) -->
+                    <p class="mt-3 text-base md:text-lg font-semibold opacity-90">
+                        Plateforme des Résultats Académiques
+                    </p>
+                </div>
+
+                <!-- LOGO DROITE : sa.png -->
+                <div class="flex-shrink-0">
+                    <img src="/static/sa.png" 
+                         alt="Logo Faculté des Sciences Agronomiques" 
+                         class="h-14 md:h-16 w-auto drop-shadow-md">
+                </div>
+
+            </div>
         </div>
-        
-        <h2 class="text-2xl font-semibold text-center mb-8 text-[#001f3f]">
-            Connexion Étudiant
-        </h2>
-        
-        <div class="space-y-6">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Matricule</label>
-                <input id="matricule" 
-                       type="text" 
-                       placeholder="Ex: UNILU25L10001"
-                       class="w-full px-4 py-4 border border-gray-300 rounded-2xl 
-                              focus:outline-none focus:border-[#001f3f] text-lg">
+    </div>
+
+    <!-- ==================== CONTENU PRINCIPAL (carte de connexion) ==================== -->
+    <div class="flex items-center justify-center py-12 px-4">
+        <div class="card w-full max-w-md p-10">
+            <h2 class="text-2xl font-semibold text-center mb-8 text-[#001f3f]">
+                Connexion Étudiant
+            </h2>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Matricule</label>
+                    <input id="matricule" 
+                           type="text" 
+                           placeholder="Ex: UNILU25L10001"
+                           class="w-full px-4 py-4 border border-gray-300 rounded-2xl 
+                                  focus:outline-none focus:border-[#001f3f] text-lg">
+                </div>
+                
+                <button onclick="connecter()" 
+                        class="w-full bg-[#001f3f] hover:bg-blue-900 text-white py-5 
+                               rounded-2xl text-xl font-semibold transition">
+                    Se connecter
+                </button>
             </div>
             
-            <button onclick="connecter()" 
-                    class="w-full bg-[#001f3f] hover:bg-blue-900 text-white py-5 
-                           rounded-2xl text-xl font-semibold transition">
-                Se connecter
-            </button>
+            <p id="message" class="mt-6 text-center text-red-600 font-medium"></p>
         </div>
-        
-        <p id="message" class="mt-6 text-center text-red-600 font-medium"></p>
     </div>
 
     <script>

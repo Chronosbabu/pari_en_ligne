@@ -3,6 +3,7 @@ import sqlite3
 import datetime
 
 app = Flask(__name__)
+
 DB_NAME = 'unilu.db'
 
 def init_db():
@@ -15,7 +16,7 @@ def init_db():
                     post_nom TEXT NOT NULL,
                     prenom TEXT NOT NULL,
                     promotion TEXT NOT NULL)''')
-    
+   
     c.execute('''CREATE TABLE IF NOT EXISTS results (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     matricule TEXT NOT NULL,

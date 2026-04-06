@@ -7,28 +7,80 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background: #f8fafc; }
-        .header { background: linear-gradient(90deg, #001f3f, #003366); }
-        .nav-fixed { position: sticky; top: 0; z-index: 50; background: white; box-shadow: 0 4px 12px rgba(0,31,63,0.1); }
-        .result-card { transition: all 0.3s; }
-        .result-card:hover { transform: translateY(-3px); }
+        .header { 
+            background: linear-gradient(90deg, #001f3f, #003366); 
+        }
+        .nav-fixed { 
+            position: sticky; 
+            top: 0; 
+            z-index: 50; 
+            background: white; 
+            box-shadow: 0 4px 12px rgba(0,31,63,0.1); 
+        }
+        .result-card { 
+            transition: all 0.3s; 
+        }
+        .result-card:hover { 
+            transform: translateY(-3px); 
+        }
+        .student-bar {
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,31,63,0.1);
+        }
     </style>
 </head>
 <body class="min-h-screen pb-12">
+    
+    <!-- ==================== HEADER COMMUN (logos + nom université) ==================== -->
     <div class="header text-white py-6 md:py-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between gap-6">
+                
+                <!-- LOGO GAUCHE : unilu.png -->
+                <div class="flex-shrink-0">
+                    <img src="/static/unilu.png" 
+                         alt="Logo Université de Lubumbashi" 
+                         class="h-14 md:h-16 w-auto drop-shadow-md">
+                </div>
+
+                <!-- TEXTE CENTRAL -->
+                <div class="text-center flex-1">
+                    <h1 class="text-3xl md:text-4xl font-bold tracking-tight leading-none">
+                        UNIVERSITÉ DE LUBUMBASHI
+                    </h1>
+                    <p class="text-lg md:text-xl mt-1 font-medium opacity-95">
+                        FACULTÉ DE SCIENCES AGRONOMIQUES ET ENVIRONNEMENT
+                    </p>
+                    <!-- Titre de la plateforme -->
+                    <p class="mt-3 text-base md:text-lg font-semibold opacity-90">
+                        Plateforme des Résultats Académiques
+                    </p>
+                </div>
+
+                <!-- LOGO DROITE : sa.png -->
+                <div class="flex-shrink-0">
+                    <img src="/static/sa.png" 
+                         alt="Logo Faculté des Sciences Agronomiques" 
+                         class="h-14 md:h-16 w-auto drop-shadow-md">
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== BARRE ÉTUDIANT (juste après les images, comme demandé) ==================== -->
+    <div class="student-bar py-5 border-b">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 class="text-3xl md:text-4xl font-bold">UNILU</h1>
-                    <p class="text-lg md:text-xl mt-1 opacity-90">Plateforme des Résultats Académiques</p>
-                </div>
-                <div class="text-left sm:text-right">
-                    <p id="matricule-display" class="font-mono text-base md:text-lg opacity-75"></p>
-                    <p id="welcome" class="text-xl md:text-2xl font-medium"></p>
+                <div class="text-left sm:text-right w-full sm:w-auto">
+                    <p id="matricule-display" class="font-mono text-base md:text-lg text-gray-500"></p>
+                    <p id="welcome" class="text-xl md:text-2xl font-medium text-[#001f3f]"></p>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- ==================== NAVIGATION (onglets) ==================== -->
     <div class="nav-fixed">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex flex-col sm:flex-row gap-3">
@@ -42,6 +94,7 @@
         </div>
     </div>
 
+    <!-- ==================== CONTENU DES RÉSULTATS ==================== -->
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
         <div id="results-container" class="space-y-12"></div>
     </div>
@@ -53,7 +106,7 @@
             const matricule = new URLSearchParams(window.location.search).get('matricule');
             if (!matricule) return;
 
-            document.getElementById('matricule-display').textContent = matricule;
+            document.getElementById('matricule-display').textContent = `📌 ${matricule}`;
 
             const validateRes = await fetch('/api/validate_matricule', {
                 method: 'POST',
