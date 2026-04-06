@@ -11,8 +11,6 @@
         .nav-fixed { position: sticky; top: 0; z-index: 50; background: white; box-shadow: 0 4px 12px rgba(0,31,63,0.1); }
         .result-card { transition: all 0.3s; }
         .result-card:hover { transform: translateY(-3px); }
-        table { border-collapse: collapse; }
-        th, td { padding: 12px 16px; text-align: center; }
     </style>
 </head>
 <body class="min-h-screen pb-12">
@@ -34,10 +32,12 @@
     <div class="nav-fixed">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex flex-col sm:flex-row gap-3">
-                <button onclick="showSection('interrogation')" id="btn-interro" class="tab-button active flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-3xl border-2 border-[#001f3f] font-semibold">
-                    <span class="text-2xl">📝</span> INTERROGATIONS
+                <button onclick="showSection('moyenne_periode')" id="btn-periode" 
+                        class="tab-button active flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-3xl border-2 border-[#001f3f] font-semibold">
+                    <span class="text-2xl">📊</span> MOYENNE PÉRIODE
                 </button>
-                <button onclick="showSection('examen')" id="btn-examen" class="tab-button flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-3xl border-2 border-[#001f3f] font-semibold">
+                <button onclick="showSection('examen')" id="btn-examen" 
+                        class="tab-button flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-3xl border-2 border-[#001f3f] font-semibold">
                     <span class="text-2xl">📕</span> EXAMENS
                 </button>
             </div>
@@ -72,23 +72,28 @@
             container.innerHTML = `
                 <div class="text-center py-12 md:py-20">
                     <h2 class="text-3xl font-semibold text-[#001f3f] mb-3">📋 Vos résultats</h2>
-                    <p class="text-gray-500">Cliquez sur un bouton ci-dessus</p>
+                    <p class="text-gray-500">Sélectionnez une section ci-dessus</p>
                 </div>
-                <div id="section-interro" class="hidden"></div>
+                <div id="section-periode" class="hidden"></div>
                 <div id="section-examen" class="hidden"></div>
             `;
         }
 
-        function createExamenCard(r) {
+        function createResultCard(r, type) {
             const isEchec = r.status === 'ÉCHEC';
+            const title = type === 'moyenne_periode' ? 'MOYENNE PÉRIODE' : 'EXAMEN';
+            const emoji = type === 'moyenne_periode' ? '📊' : '📕';
+
             return `
             <div class="result-card bg-white rounded-3xl shadow-sm border border-gray-100 p-7">
-                <div class="flex justify-between">
+                <div class="flex justify-between items-start">
                     <div>
-                        <span class="px-4 py-1 bg-purple-100 text-purple-700 rounded-3xl text-sm font-bold">EXAMEN</span>
+                        <span class="px-4 py-1 bg-blue-100 text-blue-700 rounded-3xl text-sm font-bold">${emoji} ${title}</span>
                         <h4 class="text-xl font-semibold mt-4">${r.course}</h4>
                     </div>
-                    <span class="px-5 py-2 rounded-3xl text-sm font-bold ${isEchec ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${r.status}</span>
+                    <span class="px-5 py-2 rounded-3xl text-sm font-bold ${isEchec ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">
+                        ${r.status}
+                    </span>
                 </div>
                 <div class="flex items-baseline gap-3 mt-8">
                     <span class="text-6xl font-semibold text-[#001f3f]">${r.cote}</span>
@@ -99,84 +104,26 @@
             </div>`;
         }
 
-        function createInterroTable(courseResults) {
-            let rows = '';
-            let totalCote = 0;
-            let count = 0;
-
-            const order = ['td', 'tp', 'application', 'interrogation'];
-            const labels = {td: 'TD', tp: 'TP', application: 'Application', interrogation: 'Interrogation'};
-
-            order.forEach(key => {
-                const item = courseResults.find(r => r.type === key);
-                if (item) {
-                    const isEchec = item.status === 'ÉCHEC';
-                    rows += `
-                    <tr class="border-b">
-                        <td class="font-medium text-left">${labels[key]}</td>
-                        <td class="font-semibold">${item.cote} / ${item.ponderation}</td>
-                        <td class="${isEchec ? 'text-red-600' : 'text-emerald-600'}">${item.status}</td>
-                        <td class="text-xs text-gray-500">${item.date}</td>
-                    </tr>`;
-                    totalCote += item.cote;
-                    count++;
-                }
-            });
-
-            const moyenne = count > 0 ? (totalCote / count).toFixed(2) : 0;
-
-            return `
-            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-7">
-                <h4 class="text-xl font-semibold mb-6">${courseResults[0].course}</h4>
-                <table class="w-full">
-                    <thead>
-                        <tr class="border-b text-gray-500 text-sm">
-                            <th class="text-left">Composant</th>
-                            <th>Cote</th>
-                            <th>Statut</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>${rows}</tbody>
-                </table>
-                <div class="mt-6 flex justify-between items-center bg-gray-50 rounded-2xl p-4">
-                    <span class="font-semibold text-lg">Moyenne Interrogation :</span>
-                    <span class="text-4xl font-bold text-[#001f3f]">${moyenne}</span>
-                </div>
-            </div>`;
-        }
-
         function showSection(type) {
-            document.getElementById('section-interro').classList.add('hidden');
+            document.getElementById('section-periode').classList.add('hidden');
             document.getElementById('section-examen').classList.add('hidden');
-            document.getElementById('btn-interro').classList.remove('active');
+            document.getElementById('btn-periode').classList.remove('active');
             document.getElementById('btn-examen').classList.remove('active');
 
-            const container = document.getElementById(type === 'interrogation' ? 'section-interro' : 'section-examen');
+            const container = document.getElementById(type === 'moyenne_periode' ? 'section-periode' : 'section-examen');
             container.classList.remove('hidden');
 
-            if (type === 'interrogation') document.getElementById('btn-interro').classList.add('active');
+            if (type === 'moyenne_periode') document.getElementById('btn-periode').classList.add('active');
             else document.getElementById('btn-examen').classList.add('active');
 
-            // Grouper par cours
-            const grouped = {};
-            allResults.filter(r => (type === 'interrogation' ? ['td','tp','application','interrogation'] : ['examen']).includes(r.type))
-                      .forEach(r => {
-                          if (!grouped[r.course]) grouped[r.course] = [];
-                          grouped[r.course].push(r);
-                      });
+            const filtered = allResults.filter(r => r.type === type);
 
-            let html = `<h3 class="text-2xl font-semibold text-[#001f3f] mb-8">${type.toUpperCase()}</h3>`;
-            Object.keys(grouped).forEach(course => {
-                if (type === 'interrogation') {
-                    html += createInterroTable(grouped[course]);
-                } else {
-                    html += createExamenCard(grouped[course][0]);
-                }
-            });
+            let html = `<h3 class="text-2xl font-semibold text-[#001f3f] mb-8">${type === 'moyenne_periode' ? 'MOYENNE PÉRIODE' : 'EXAMENS'}</h3>`;
 
-            if (Object.keys(grouped).length === 0) {
-                html += `<p class="text-gray-400 text-center py-16">Aucune ${type} publiée pour le moment.</p>`;
+            if (filtered.length === 0) {
+                html += `<p class="text-gray-400 text-center py-16">Aucun résultat publié pour le moment.</p>`;
+            } else {
+                filtered.forEach(r => html += createResultCard(r, type));
             }
 
             container.innerHTML = html;

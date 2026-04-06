@@ -3,7 +3,6 @@ import sqlite3
 import datetime
 
 app = Flask(__name__)
-
 DB_NAME = 'unilu.db'
 
 def init_db():
@@ -20,8 +19,8 @@ def init_db():
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     matricule TEXT NOT NULL,
                     course TEXT NOT NULL,
-                    result_type TEXT NOT NULL 
-                        CHECK(result_type IN ('td', 'tp', 'application', 'interrogation', 'examen')),
+                    result_type TEXT NOT NULL
+                        CHECK(result_type IN ('moyenne_periode', 'examen')),
                     cote REAL NOT NULL,
                     ponderation INTEGER NOT NULL,
                     publication_date TEXT NOT NULL)''')
@@ -34,11 +33,6 @@ init_db()
 def home():
     return send_from_directory('page', 'style.html')
 
-@app.route('/perso.html')
-def perso():
-    return send_from_directory('page', 'perso.html')
-
-# Debug : voir tous les résultats
 @app.route('/api/all_results', methods=['GET'])
 def all_results():
     conn = sqlite3.connect(DB_NAME)
@@ -60,7 +54,6 @@ def register_student():
     post_nom = data['post_nom'].strip().upper()
     prenom = data['prenom'].strip().upper()
     promotion = data['promotion']
-
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
     c.execute("SELECT MAX(id) FROM students")
@@ -68,7 +61,6 @@ def register_student():
     new_id = max_id + 1
     year = datetime.datetime.now().year % 100
     matricule = f"UNILU{year}{promotion}{new_id:04d}"
-
     try:
         c.execute("""INSERT INTO students (matricule, nom, post_nom, prenom, promotion)
                      VALUES (?, ?, ?, ?, ?)""", (matricule, nom, post_nom, prenom, promotion))
